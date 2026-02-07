@@ -1,0 +1,118 @@
+SMART TRAFFIC MANAGEMENT SYSTEM
+TEAM GIT WORKFLOW GUIDE
+
+---
+
+1. GIT BASIC IDEA
+
+---
+
+Git is used to:
+
+* Track code history
+* Work in a team safely
+* Merge features into final project
+
+Main branch = final stable code
+Branches = individual work areas
+
+---
+
+#####FIRST STEP – CLONE REPOSITORY
+
+---
+
+Command:
+
+git clone <repo-link>
+cd <repo-folder>
+
+Example:
+
+git clone [https://github.com/Akshita-star/TraffiQ-4sem.git]
+cd TraffiQ-4sem
+
+---
+
+3. SWITCH TO YOUR ASSIGNED BRANCH
+
+---
+
+Each member must work only on their branch. And should only merge the branch with main when it is finalized and it is working.
+
+Command:
+
+git checkout branch-name
+
+Example:
+
+git checkout simulation-module
+
+---
+
+4. AFTER MAKING CHANGES – SAVE & PUSH
+
+---
+
+Step-by-step commands:
+
+git status
+git add .
+git commit -m "Describe your change clearly"
+git push
+
+Meaning:
+add → select files
+commit → save locally
+push → upload to GitHub
+
+IMPORTANT:
+**Without push, team cannot see your work.**
+
+---
+
+5. PULL LATEST CODE BEFORE STARTING WORK
+
+---
+
+git pull
+
+Always pull before new work to avoid conflicts.
+
+---
+
+6. DO NOT WORK ON MAIN BRANCH
+
+---
+
+Main branch is only for final merged code.
+All development must happen in module branches.
+
+---
+
+7. BRANCH NAMES FOR PROJECT
+
+---
+
+simulation-module
+backend-module
+database-analytics-module
+frontend-module
+
+Each member must use only their assigned branch.
+
+---
+
+9. GOLDEN RULES
+
+---
+
+• Always pull before starting work
+• Always commit with clear message
+• Always push after completing task
+• Never delete someone else’s code
+• Never work directly on main
+
+---
+
+## END OF GUIDE
