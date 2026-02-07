@@ -1,0 +1,36 @@
+##this explains the rough file structure you need to follow you may add or delete based on prefernce but do not change name of them as they're based on convention
+
+smart-traffic-management-system/
+│
+├── simulation/              # Traffic simulation + rule engine
+│   ├── junction/
+│   ├── vehicles/
+│   ├── signals/
+│   └── main_simulation.py
+│
+├── backend/                 # Flask/FastAPI server + APIs
+│   ├── app.py
+│   ├── routes/
+│   ├── services/
+│   └── config.py
+│
+├── database/                # SQLite + DB handling
+│   ├── models.py
+│   ├── db_setup.py
+│   └── queries.py
+│
+├── analytics/               # Graphs, stats, ambulance logic
+│   ├── dashboard_data.py
+│   ├── ambulance_priority.py
+│   └── plots.py
+│
+├── frontend/                # React / HTML-CSS-JS app
+│   ├── public/
+│   ├── src/
+│   └── package.json
+│
+├── docs/                    # PPT, report, diagrams
+│
+├── requirements.txt         # Python dependencies
+├── .gitignore
+└── README.md
