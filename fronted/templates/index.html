@@ -1,12 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-
 <meta charset="UTF-8">
 <title>Traffic Control System</title>
-
-<link rel="stylesheet" href="../style/index.css">
-
+<link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
 </head>
 
 <body>
@@ -14,16 +11,15 @@
 <div class="container">
 
 <h1>Traffic Control System</h1>
-
 <p class="subtitle">AI Based Traffic Monitoring Dashboard</p>
 
 <div class="card-container">
 
-<div class="card login-card" onclick="location.href='login.html'">
+<div class="card login-card" onclick="location.href='/login'">
 <h2>Login</h2>
 </div>
 
-<div class="card signup-card" onclick="location.href='signup.html'">
+<div class="card signup-card" onclick="location.href='/signup'">
 <h2>Signup</h2>
 </div>
 
