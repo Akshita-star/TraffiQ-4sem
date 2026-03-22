@@ -1,12 +1,19 @@
 from flask import Flask, request, redirect, render_template
 import os
-
+from simulation.simu import get_lane_data
 
 app = Flask(
     __name__,
     template_folder="fronted/templates",
-    static_folder="fronted/static"
+    static_folder="fronted/static",
+    static_url_path="/static"
 )
+
+
+@app.route('/api/traffic')
+def traffic_data():
+    data = get_lane_data()
+    return data
 
 # HOME
 @app.route('/')
@@ -50,6 +57,7 @@ def signup():
 
     # 🚀 DIRECT DASHBOARD REDIRECT
     return redirect("/dashboard")
+
 
 # ================= LOGIN =================
 @app.route('/login', methods=['POST'])
