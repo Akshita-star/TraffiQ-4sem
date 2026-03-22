@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>TraffiQ Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  :root {
+    --bg:       #080c10;
+    --bg2:      #0d1219;
+    --bg3:      #121920;
+    --border:   #1e2a35;
+    --border2:  #243040;
+    --cyan:     #00e5ff;
+    --cyan-dim: #00e5ff22;
+    --green:    #00ff88;
+    --red:      #ff3b5c;
+    --amber:    #ffb800;
+    --purple:   #a855f7;
+    --text:     #c8d8e8;
+    --text-dim: #4a6070;
+    --mono:     'Share Tech Mono', monospace;
+    --sans:     'Rajdhani', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+    font-size: 15px;
+  }
+
+  /* ── Scanline overlay ── */
+  body::after {
+    content: '';
+    position: fixed; inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,.04) 2px, rgba(0,0,0,.04) 4px);
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* ══════════════ SIDEBAR ══════════════ */
+  .sidebar {
+    width: 210px;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+  }
+
+  .logo {
+    padding: 22px 20px 18px;
+    font-family: var(--mono);
+    font-size: 22px;
+    letter-spacing: 3px;
+    color: var(--cyan);
+    border-bottom: 1px solid var(--border);
+    text-shadow: 0 0 20px var(--cyan);
+    position: relative;
+  }
+  .logo::after {
+    content: 'v2.4.1';
+    position: absolute;
+    bottom: 8px; right: 14px;
+    font-size: 9px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+  }
+
+  .nav { list-style: none; padding: 12px 0; flex: 1; }
+  .nav li {
+    padding: 11px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all .2s;
+    border-left: 3px solid transparent;
+    position: relative;
+  }
+  .nav li:hover { color: var(--text); background: rgba(0,229,255,.04); }
+  .nav li.active {
+    color: var(--cyan);
+    background: rgba(0,229,255,.07);
+    border-left-color: var(--cyan);
+    text-shadow: 0 0 12px var(--cyan);
+  }
+  .nav li.active::before {
+    content: '▶';
+    position: absolute;
+    right: 16px;
+    font-size: 8px;
+    opacity: .6;
+  }
+
+  .sidebar-footer {
+    padding: 14px 16px;
+    border-top: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--green);
+  }
+  .ping { width: 7px; height: 7px; border-radius: 50%; background: var(--green); animation: ping 2s infinite; }
+  @keyframes ping { 0%,100%{box-shadow:0 0 0 0 rgba(0,255,136,.6)} 50%{box-shadow:0 0 0 6px rgba(0,255,136,0)} }
+
+  /* ══════════════ MAIN ══════════════ */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+  header {
+    padding: 14px 28px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--bg2);
+    flex-shrink: 0;
+  }
+  header h1 {
+    font-size: 19px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #e8f4ff;
+  }
+  .header-right { display: flex; align-items: center; gap: 20px; }
+  #clock {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--cyan);
+    letter-spacing: 2px;
+  }
+  .status-badge {
+    padding: 5px 14px;
+    background: rgba(0,255,136,.1);
+    border: 1px solid rgba(0,255,136,.3);
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--green);
+    letter-spacing: 1px;
+  }
+
+  /* ══════════════ CONTENT ══════════════ */
+  .content { flex: 1; padding: 18px 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; }
+
+  /* ── Stat Cards ── */
+  .cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; flex-shrink: 0; }
+
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 18px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color .3s;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+  .card.c-cyan::before { background: linear-gradient(90deg, var(--cyan), transparent); }
+  .card.c-purple::before { background: linear-gradient(90deg, var(--purple), transparent); }
+  .card.c-green::before { background: linear-gradient(90deg, var(--green), transparent); }
+  .card.c-red::before { background: linear-gradient(90deg, var(--red), transparent); }
+
+  .card-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 10px;
+  }
+  .card-value {
+    font-family: var(--mono);
+    font-size: 32px;
+    line-height: 1;
+  }
+  .card.c-cyan .card-value { color: var(--cyan); text-shadow: 0 0 16px rgba(0,229,255,.4); }
+  .card.c-purple .card-value { color: var(--purple); text-shadow: 0 0 16px rgba(168,85,247,.4); }
+  .card.c-green .card-value { color: var(--green); text-shadow: 0 0 16px rgba(0,255,136,.4); }
+  .card.c-red .card-value { color: var(--red); text-shadow: 0 0 16px rgba(255,59,92,.4); }
+  .card-sub { font-size: 11px; color: var(--text-dim); margin-top: 6px; }
+
+  .card.emergency-on {
+    border-color: var(--red) !important;
+    animation: emergency-flash 1s infinite;
+  }
+  @keyframes emergency-flash {
+    0%,100%{background: var(--bg2)} 50%{background: rgba(255,59,92,.08)}
+  }
+
+  /* ── Grid ── */
+  .grid { display: grid; grid-template-columns: 1fr 420px; gap: 16px; flex: 1; min-height: 0; }
+
+  /* ── Panels ── */
+  .panel {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .panel-head {
+    padding: 12px 18px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .panel-title {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text);
+  }
+  .panel-tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 3px 9px;
+    border: 1px solid var(--border2);
+    border-radius: 3px;
+    color: var(--text-dim);
+  }
+  .panel-body { flex: 1; overflow-y: auto; padding: 14px; }
+
+  /* ── Lane Cards ── */
+  .lane-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
+
+  .lane-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px;
+    position: relative;
+    transition: border-color .3s, background .3s;
+  }
+  .lane-card.active-lane { border-color: rgba(0,229,255,.3); }
+  .lane-card.emergency-lane {
+    border-color: var(--red);
+    background: rgba(255,59,92,.06);
+    animation: emergency-flash 1s infinite;
+  }
+
+  .lane-name {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+  }
+
+  /* Traffic Light */
+  .traffic-light {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    margin: 0 auto 10px;
+    width: 22px;
+    background: #0a0f14;
+    border: 1px solid var(--border2);
+    border-radius: 11px;
+    padding: 4px;
+  }
+  .tl-bulb {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #1a2030;
+    transition: background .4s, box-shadow .4s;
+  }
+  .tl-bulb.on-red    { background: var(--red);   box-shadow: 0 0 8px var(--red),   0 0 20px rgba(255,59,92,.4); }
+  .tl-bulb.on-amber  { background: var(--amber);  box-shadow: 0 0 8px var(--amber), 0 0 20px rgba(255,184,0,.4); }
+  .tl-bulb.on-green  { background: var(--green);  box-shadow: 0 0 8px var(--green), 0 0 20px rgba(0,255,136,.4); }
+
+  .lane-stats { font-size: 12px; }
+  .lane-stat-row { display: flex; justify-content: space-between; padding: 2px 0; }
+  .lane-stat-label { color: var(--text-dim); }
+  .lane-stat-val { font-family: var(--mono); color: var(--text); }
+
+  .lane-timer {
+    margin-top: 8px;
+    font-family: var(--mono);
+    font-size: 20px;
+    font-weight: 700;
+    text-align: center;
+    letter-spacing: 1px;
+  }
+  .lane-timer.red   { color: var(--red); }
+  .lane-timer.amber { color: var(--amber); }
+  .lane-timer.green { color: var(--green); }
+
+  .phase-label {
+    text-align: center;
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-top: 3px;
+    color: var(--text-dim);
+  }
+
+  .emg-badge {
+    position: absolute;
+    top: 8px; right: 8px;
+    font-size: 9px;
+    padding: 2px 6px;
+    background: var(--red);
+    color: #fff;
+    border-radius: 3px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    animation: ping 1s infinite;
+  }
+
+  /* ── Right column ── */
+  .right-col { display: flex; flex-direction: column; gap: 16px; min-height: 0; }
+
+  .chart-panel { flex: 1; min-height: 0; }
+  .chart-wrap { height: 100%; position: relative; }
+
+  /* ── Loading / Error ── */
+  .loading-overlay {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 8px;
+    background: rgba(8,12,16,.8);
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-dim);
+    border-radius: 8px;
+    z-index: 10;
+  }
+  .loading-overlay.hidden { display: none; }
+  .spinner {
+    width: 28px; height: 28px;
+    border: 2px solid var(--border2);
+    border-top-color: var(--cyan);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .error-state { color: var(--red); text-align: center; padding: 20px; font-family: var(--mono); font-size: 12px; }
+  .error-state span { display: block; font-size: 20px; margin-bottom: 8px; }
+
+  /* ── Alerts ── */
+  .alerts-panel { flex-shrink: 0; }
+  #alerts-list { max-height: 130px; overflow-y: auto; }
+  .alert-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+    animation: slideIn .3s ease;
+  }
+  @keyframes slideIn { from{opacity:0;transform:translateX(-8px)} to{opacity:1;transform:none} }
+  .alert-item:last-child { border-bottom: none; }
+  .alert-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .a-crit .alert-dot { background: var(--red); box-shadow: 0 0 6px var(--red); animation: ping 1s infinite; }
+  .a-warn .alert-dot { background: var(--amber); }
+  .a-ok   .alert-dot { background: var(--green); }
+  .alert-time { margin-left: auto; font-family: var(--mono); font-size: 10px; color: var(--text-dim); }
+  .no-alerts { padding: 16px; text-align: center; color: var(--text-dim); font-size: 12px; font-family: var(--mono); }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+</style>
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="logo">TRAFFIQ</div>
+  <ul class="nav">
+    <li class="active">Dashboard</li>
+    <li>Simulation</li>
+    <li>Analytics</li>
+    <li>Alerts</li>
+    <li>Settings</li>
+  </ul>
+  <div class="sidebar-footer">
+    <div class="ping"></div>
+    SUMO CONNECTED
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <header>
+    <h1>Smart Traffic Control Dashboard</h1>
+    <div class="header-right">
+      <span id="clock">--:--:--</span>
+      <span class="status-badge">● SYSTEM ONLINE</span>
+    </div>
+  </header>
+
+  <div class="content">
+
+    <!-- Stat Cards -->
+    <div class="cards">
+      <div class="card c-cyan">
+        <div class="card-label">Total Vehicles</div>
+        <div class="card-value" id="vehicleCount">--</div>
+        <div class="card-sub" id="vehicle-sub">Fetching...</div>
+      </div>
+      <div class="card c-purple">
+        <div class="card-label">Total Lanes</div>
+        <div class="card-value" id="laneCount">--</div>
+        <div class="card-sub">Monitored lanes</div>
+      </div>
+      <div class="card c-green">
+        <div class="card-label">Active Lanes</div>
+        <div class="card-value" id="activeLanes">--</div>
+        <div class="card-sub" id="active-sub">Lanes with traffic</div>
+      </div>
+      <div class="card c-red" id="emergency-card">
+        <div class="card-label">Emergency</div>
+        <div class="card-value" id="emergency">--</div>
+        <div class="card-sub" id="emergency-sub">Checking...</div>
+      </div>
+    </div>
+
+    <!-- Main Grid -->
+    <div class="grid" style="flex:1;min-height:0;">
+
+      <!-- LEFT: Lane Simulation Panel -->
+      <div class="panel simulation">
+        <div class="panel-head">
+          <span class="panel-title">Lane Simulation — Traffic Signals</span>
+          <span class="panel-tag" id="refresh-tag">LIVE</span>
+        </div>
+        <div class="panel-body" style="position:relative;">
+          <div class="loading-overlay" id="sim-loading">
+            <div class="spinner"></div>
+            <span>Connecting to SUMO...</span>
+          </div>
+          <div class="lane-grid" id="laneData"></div>
+        </div>
+      </div>
+
+      <!-- RIGHT -->
+      <div class="right-col">
+
+        <!-- Chart -->
+        <div class="panel chart-panel">
+          <div class="panel-head">
+            <span class="panel-title">Traffic Flow</span>
+            <span class="panel-tag">veh / cycle</span>
+          </div>
+          <div class="panel-body" style="padding:10px;">
+            <div class="chart-wrap">
+              <canvas id="trafficChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Alerts -->
+        <div class="panel alerts-panel">
+          <div class="panel-head">
+            <span class="panel-title">System Alerts</span>
+            <span class="panel-tag" id="alert-count">0</span>
+          </div>
+          <div id="alerts-list">
+            <div class="no-alerts">No active alerts</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+//  CLOCK
+// ═══════════════════════════════════════════
+function updateClock() {
+  const n = new Date();
+  document.getElementById('clock').textContent =
+    n.toLocaleTimeString('en-IN', { hour12: false });
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ═══════════════════════════════════════════
+//  TRAFFIC LIGHT STATE MACHINE PER LANE
+//  Each lane keeps its own phase + countdown
+//  If API sends phase info → use it
+//  Otherwise → derive from vehicle count
+// ═══════════════════════════════════════════
+const laneTimers = {};   // lane_id → { phase, countdown, interval }
+
+function getPhaseFromAPI(laneInfo) {
+  // If your SUMO API sends phase data, map it here
+  if (laneInfo.phase !== undefined) return laneInfo.phase;        // 'green'|'amber'|'red'
+  if (laneInfo.signal !== undefined) return laneInfo.signal;
+  if (laneInfo.light !== undefined)  return laneInfo.light;
+  return null;  // will auto-derive
+}
+
+function derivePhase(vehicles) {
+  // Fallback: heavy traffic → green, no traffic → red
+  if (vehicles > 8) return 'green';
+  if (vehicles > 3) return 'amber';
+  return 'red';
+}
+
+function initLaneTimer(laneId, phase) {
+  if (laneTimers[laneId]) {
+    clearInterval(laneTimers[laneId].interval);
+  }
+  const durations = { green: 30, amber: 5, red: 25 };
+  const timer = {
+    phase,
+    countdown: durations[phase] || 30,
+    interval: null
+  };
+  timer.interval = setInterval(() => {
+    timer.countdown--;
+    if (timer.countdown <= 0) {
+      const next = { green: 'amber', amber: 'red', red: 'green' };
+      timer.phase = next[timer.phase];
+      timer.countdown = durations[timer.phase];
+    }
+    updateLaneTimerUI(laneId, timer);
+  }, 1000);
+  laneTimers[laneId] = timer;
+  return timer;
+}
+
+function updateLaneTimerUI(laneId, timer) {
+  const card = document.querySelector(`.lane-card[data-lane="${laneId}"]`);
+  if (!card) return;
+  const timerEl  = card.querySelector('.lane-timer');
+  const phaseEl  = card.querySelector('.phase-label');
+  const bulbRed   = card.querySelector('.tl-red');
+  const bulbAmber = card.querySelector('.tl-amber');
+  const bulbGreen = card.querySelector('.tl-green');
+  if (!timerEl) return;
+
+  bulbRed.className   = 'tl-bulb tl-red'   + (timer.phase === 'red'   ? ' on-red'   : '');
+  bulbAmber.className = 'tl-bulb tl-amber'  + (timer.phase === 'amber' ? ' on-amber' : '');
+  bulbGreen.className = 'tl-bulb tl-green'  + (timer.phase === 'green' ? ' on-green' : '');
+
+  timerEl.textContent  = timer.countdown + 's';
+  timerEl.className    = 'lane-timer ' + timer.phase;
+  phaseEl.textContent  = timer.phase.toUpperCase();
+}
+
+// ═══════════════════════════════════════════
+//  CHART
+// ═══════════════════════════════════════════
+const chartLabels = [];
+const chartData   = [];
+let chart;
+
+function initChart() {
+  const ctx = document.getElementById('trafficChart').getContext('2d');
+  chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: chartLabels,
+      datasets: [{
+        label: 'Total Vehicles',
+        data: chartData,
+        borderColor: '#00e5ff',
+        backgroundColor: 'rgba(0,229,255,.08)',
+        borderWidth: 2,
+        pointRadius: 3,
+        pointBackgroundColor: '#00e5ff',
+        fill: true,
+        tension: 0.4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 400 },
+      plugins: { legend: { display: false } },
+      scales: {
+        x: {
+          ticks: { color: '#4a6070', font: { family: "'Share Tech Mono'", size: 10 }, maxTicksLimit: 8, autoSkip: true },
+          grid:  { color: '#1e2a35' }
+        },
+        y: {
+          ticks: { color: '#4a6070', font: { family: "'Share Tech Mono'", size: 10 } },
+          grid:  { color: '#1e2a35' },
+          beginAtZero: true
+        }
+      }
+    }
+  });
+}
+
+function pushChartPoint(total) {
+  const t = new Date().toLocaleTimeString('en-IN', { hour12: false, hour:'2-digit', minute:'2-digit', second:'2-digit' });
+  chartLabels.push(t);
+  chartData.push(total);
+  if (chartLabels.length > 20) { chartLabels.shift(); chartData.shift(); }
+  chart.update();
+}
+
+// ═══════════════════════════════════════════
+//  ALERTS
+// ═══════════════════════════════════════════
+const alertLog = [];
+
+function addAlert(type, msg) {
+  const time = new Date().toLocaleTimeString('en-IN', { hour12: false, hour:'2-digit', minute:'2-digit' });
+  alertLog.unshift({ type, msg, time });
+  if (alertLog.length > 6) alertLog.pop();
+  renderAlerts();
+}
+
+function renderAlerts() {
+  const list = document.getElementById('alerts-list');
+  document.getElementById('alert-count').textContent = alertLog.length;
+  if (!alertLog.length) {
+    list.innerHTML = '<div class="no-alerts">No active alerts</div>';
+    return;
+  }
+  list.innerHTML = alertLog.map(a =>
+    `<div class="alert-item a-${a.type}">
+       <div class="alert-dot"></div>
+       <div style="flex:1">${a.msg}</div>
+       <div class="alert-time">${a.time}</div>
+     </div>`
+  ).join('');
+}
+
+// ═══════════════════════════════════════════
+//  RENDER LANE CARDS
+// ═══════════════════════════════════════════
+let firstLoad = true;
+let lastEmergencyState = false;
+
+function renderLanes(lanes) {
+  const container = document.getElementById('laneData');
+  const existingCards = new Set([...container.querySelectorAll('.lane-card')].map(c => c.dataset.lane));
+  const newLaneIds = new Set(Object.keys(lanes));
+
+  // Remove cards for lanes that no longer exist
+  existingCards.forEach(id => {
+    if (!newLaneIds.has(id)) {
+      const old = container.querySelector(`.lane-card[data-lane="${id}"]`);
+      if (old) old.remove();
+      if (laneTimers[id]) { clearInterval(laneTimers[id].interval); delete laneTimers[id]; }
+    }
+  });
+
+  Object.entries(lanes).forEach(([laneId, info]) => {
+    const vehicles   = info.vehicles || 0;
+    const emergency  = info.emergency || false;
+    const apiPhase   = getPhaseFromAPI(info);
+
+    // Init timer on first load or if phase changed via API
+    if (!laneTimers[laneId]) {
+      const phase = apiPhase || derivePhase(vehicles);
+      initLaneTimer(laneId, phase);
+    } else if (apiPhase && apiPhase !== laneTimers[laneId].phase) {
+      // API is authoritative — resync
+      clearInterval(laneTimers[laneId].interval);
+      delete laneTimers[laneId];
+      initLaneTimer(laneId, apiPhase);
+    }
+
+    const timer = laneTimers[laneId];
+
+    // Build or update card
+    let card = container.querySelector(`.lane-card[data-lane="${laneId}"]`);
+    if (!card) {
+      card = document.createElement('div');
+      card.className = 'lane-card';
+      card.dataset.lane = laneId;
+      card.innerHTML = `
+        <div class="lane-name">${laneId}</div>
+        <div class="traffic-light">
+          <div class="tl-bulb tl-red"></div>
+          <div class="tl-bulb tl-amber"></div>
+          <div class="tl-bulb tl-green"></div>
+        </div>
+        <div class="lane-timer ${timer.phase}">${timer.countdown}s</div>
+        <div class="phase-label">${timer.phase.toUpperCase()}</div>
+        <div class="lane-stats">
+          <div class="lane-stat-row">
+            <span class="lane-stat-label">Vehicles</span>
+            <span class="lane-stat-val veh-count">${vehicles}</span>
+          </div>
+          <div class="lane-stat-row">
+            <span class="lane-stat-label">Emergency</span>
+            <span class="lane-stat-val emg-val">${emergency ? '🚑 YES' : 'None'}</span>
+          </div>
+        </div>
+        ${emergency ? '<div class="emg-badge">EMG</div>' : ''}
+      `;
+      container.appendChild(card);
+    } else {
+      // Update existing card stats
+      card.querySelector('.veh-count').textContent = vehicles;
+      card.querySelector('.emg-val').textContent   = emergency ? '🚑 YES' : 'None';
+      const badge = card.querySelector('.emg-badge');
+      if (emergency && !badge) {
+        const b = document.createElement('div');
+        b.className = 'emg-badge'; b.textContent = 'EMG';
+        card.appendChild(b);
+      } else if (!emergency && badge) {
+        badge.remove();
+      }
+    }
+
+    // Update classes
+    card.classList.toggle('emergency-lane', emergency);
+    card.classList.toggle('active-lane', vehicles > 0 && !emergency);
+
+    // Sync light UI
+    updateLaneTimerUI(laneId, timer);
+  });
+}
+
+// ═══════════════════════════════════════════
+//  MAIN DATA FETCH
+// ═══════════════════════════════════════════
+let fetchCount = 0;
+
+async function loadTrafficData() {
+  try {
+    const res  = await fetch('/api/traffic');
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+
+    const lanes        = data.lanes || {};
+    const laneIds      = Object.keys(lanes);
+    const laneCount    = laneIds.length;
+    let totalVehicles  = 0;
+    let activeLanes    = 0;
+    let emergencyFound = false;
+
+    laneIds.forEach(id => {
+      const l = lanes[id];
+      totalVehicles += (l.vehicles || 0);
+      if ((l.vehicles || 0) > 0) activeLanes++;
+      if (l.emergency) emergencyFound = true;
+    });
+
+    // Update stat cards
+    document.getElementById('vehicleCount').textContent = totalVehicles;
+    document.getElementById('laneCount').textContent    = laneCount;
+    document.getElementById('activeLanes').textContent  = activeLanes;
+    document.getElementById('emergency').textContent    = emergencyFound ? 'YES' : 'NONE';
+    document.getElementById('vehicle-sub').textContent  = `${activeLanes} active, ${laneCount - activeLanes} clear`;
+    document.getElementById('active-sub').textContent   = `${Math.round(activeLanes/laneCount*100)||0}% utilisation`;
+
+    const emergCard = document.getElementById('emergency-card');
+    const emergSub  = document.getElementById('emergency-sub');
+    if (emergencyFound) {
+      emergCard.classList.add('emergency-on');
+      emergSub.textContent = '⚠ Emergency vehicle detected!';
+      if (!lastEmergencyState) addAlert('crit', 'Emergency vehicle detected — priority signal activated');
+    } else {
+      emergCard.classList.remove('emergency-on');
+      emergSub.textContent = 'All clear';
+    }
+    lastEmergencyState = emergencyFound;
+
+    // Render lanes
+    renderLanes(lanes);
+
+    // Chart
+    pushChartPoint(totalVehicles);
+
+    // Auto alerts
+    if (totalVehicles > 60) addAlert('warn', `High load — ${totalVehicles} vehicles detected across network`);
+
+    // Hide loader
+    if (firstLoad) {
+      document.getElementById('sim-loading').classList.add('hidden');
+      firstLoad = false;
+      addAlert('ok', 'SUMO TraCI connection established — data streaming live');
+    }
+
+    fetchCount++;
+    document.getElementById('refresh-tag').textContent = `LIVE #${fetchCount}`;
+
+  } catch (err) {
+    console.error('Traffic fetch error:', err);
+    const container = document.getElementById('laneData');
+    if (firstLoad) {
+      document.getElementById('sim-loading').innerHTML =
+        `<div class="error-state"><span>⚠</span>Cannot reach /api/traffic<br><small>${err.message}</small></div>`;
+    }
+    addAlert('warn', `API error: ${err.message}`);
+  }
+}
+
+// ═══════════════════════════════════════════
+//  BOOT
+// ═══════════════════════════════════════════
+initChart();
+loadTrafficData();
+setInterval(loadTrafficData, 2000);
+</script>
+
+</body>
+</html>

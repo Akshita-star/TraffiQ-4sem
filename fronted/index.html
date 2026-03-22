@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Traffic Control System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:      #080c10;
+    --bg2:     #0d1219;
+    --bg3:     #121920;
+    --border:  #1e2a35;
+    --border2: #243040;
+    --cyan:    #00e5ff;
+    --green:   #00ff88;
+    --red:     #ff3b5c;
+    --text:    #c8d8e8;
+    --text-dim:#4a6070;
+    --mono:    'Share Tech Mono', monospace;
+    --sans:    'Rajdhani', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* ── Grid background ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(0,229,255,.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,255,.04) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+  }
+
+  /* ── Scanline overlay ── */
+  body::after {
+    content: '';
+    position: fixed; inset: 0;
+    background: repeating-linear-gradient(
+      0deg, transparent, transparent 2px,
+      rgba(0,0,0,.05) 2px, rgba(0,0,0,.05) 4px
+    );
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  /* ── Glow orb ── */
+  .orb {
+    position: fixed;
+    width: 500px; height: 500px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,229,255,.07) 0%, transparent 70%);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    animation: breathe 6s ease-in-out infinite;
+  }
+  @keyframes breathe {
+    0%,100% { transform: translate(-50%,-50%) scale(1);   opacity: .7; }
+    50%      { transform: translate(-50%,-50%) scale(1.1); opacity: 1;  }
+  }
+
+  /* ── Corner decorations ── */
+  .corner {
+    position: fixed;
+    width: 60px; height: 60px;
+    border-color: rgba(0,229,255,.2);
+    border-style: solid;
+    pointer-events: none;
+  }
+  .corner-tl { top: 24px; left: 24px;  border-width: 2px 0 0 2px; }
+  .corner-tr { top: 24px; right: 24px; border-width: 2px 2px 0 0; }
+  .corner-bl { bottom: 24px; left: 24px;  border-width: 0 0 2px 2px; }
+  .corner-br { bottom: 24px; right: 24px; border-width: 0 2px 2px 0; }
+
+  /* ── Container ── */
+  .container {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    animation: fadeUp .8s ease both;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  /* ── Logo / top tag ── */
+  .sys-tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--cyan);
+    text-transform: uppercase;
+    opacity: .7;
+    margin-bottom: 4px;
+  }
+
+  /* ── Main heading ── */
+  h1 {
+    font-family: var(--mono);
+    font-size: clamp(28px, 5vw, 46px);
+    font-weight: 400;
+    letter-spacing: 4px;
+    text-align: center;
+    color: #e8f4ff;
+    text-shadow: 0 0 40px rgba(0,229,255,.3);
+    line-height: 1.15;
+  }
+  h1 span { color: var(--cyan); }
+
+  .subtitle {
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  /* ── Divider ── */
+  .divider {
+    width: 200px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+    margin: 4px 0 32px;
+    opacity: .5;
+  }
+
+  /* ── Card container ── */
+  .card-container {
+    display: flex;
+    gap: 24px;
+  }
+
+  /* ── Cards ── */
+  .card {
+    width: 200px;
+    padding: 32px 24px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    position: relative;
+    overflow: hidden;
+    transition: transform .25s ease, border-color .25s ease, background .25s ease;
+    animation: fadeUp .8s ease both;
+  }
+  .card:hover {
+    transform: translateY(-6px);
+    background: var(--bg3);
+  }
+
+  /* Top accent line */
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    transition: opacity .3s;
+  }
+  .login-card  { animation-delay: .15s; }
+  .signup-card { animation-delay: .25s; }
+
+  .login-card::before  { background: linear-gradient(90deg, transparent, var(--cyan), transparent); }
+  .signup-card::before { background: linear-gradient(90deg, transparent, var(--green), transparent); }
+
+  .login-card:hover  { border-color: rgba(0,229,255,.4);  box-shadow: 0 0 30px rgba(0,229,255,.08); }
+  .signup-card:hover { border-color: rgba(0,255,136,.4);  box-shadow: 0 0 30px rgba(0,255,136,.08); }
+
+  /* Icon */
+  .card-icon {
+    font-size: 28px;
+    line-height: 1;
+  }
+
+  .card h2 {
+    font-family: var(--mono);
+    font-size: 16px;
+    font-weight: 400;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+  .login-card  h2 { color: var(--cyan); }
+  .signup-card h2 { color: var(--green); }
+
+  .card-sub {
+    font-size: 11px;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+    text-align: center;
+  }
+
+  /* Arrow indicator */
+  .card-arrow {
+    font-family: var(--mono);
+    font-size: 18px;
+    opacity: 0;
+    transform: translateX(-6px);
+    transition: opacity .25s, transform .25s;
+  }
+  .login-card  .card-arrow { color: var(--cyan); }
+  .signup-card .card-arrow { color: var(--green); }
+  .card:hover .card-arrow { opacity: 1; transform: none; }
+
+  /* ── Bottom status bar ── */
+  .status-bar {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    padding: 8px 24px;
+    border-top: 1px solid var(--border);
+    background: var(--bg2);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    z-index: 10;
+  }
+  .status-left { display: flex; align-items: center; gap: 10px; }
+  .ping { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: ping 2s infinite; }
+  @keyframes ping {
+    0%,100% { box-shadow: 0 0 0 0 rgba(0,255,136,.6); }
+    50%      { box-shadow: 0 0 0 5px rgba(0,255,136,0); }
+  }
+  #clock { color: var(--cyan); letter-spacing: 2px; }
+</style>
+</head>
+
+<body>
+
+<div class="orb"></div>
+<div class="corner corner-tl"></div>
+<div class="corner corner-tr"></div>
+<div class="corner corner-bl"></div>
+<div class="corner corner-br"></div>
+
+<div class="container">
+
+  <div class="sys-tag">// traffiq system v2.4.1</div>
+
+  <h1>TRAFFIC<br><span>CONTROL</span></h1>
+
+  <p class="subtitle">AI Based Traffic Monitoring Dashboard</p>
+
+  <div class="divider"></div>
+
+  <div class="card-container">
+
+    <div class="card login-card" onclick="location.href='/login'">
+      <div class="card-icon">⬡</div>
+      <h2>Login</h2>
+      <div class="card-sub">Access your dashboard</div>
+      <div class="card-arrow">→</div>
+    </div>
+
+    <div class="card signup-card" onclick="location.href='/signup'">
+      <div class="card-icon">⬡</div>
+      <h2>Signup</h2>
+      <div class="card-sub">Create a new account</div>
+      <div class="card-arrow">→</div>
+    </div>
+
+  </div>
+
+</div>
+
+<div class="status-bar">
+  <div class="status-left">
+    <div class="ping"></div>
+    <span>SYSTEM ONLINE</span>
+  </div>
+  <span id="clock">--:--:--</span>
+</div>
+
+<script>
+function updateClock() {
+  document.getElementById('clock').textContent =
+    new Date().toLocaleTimeString('en-IN', { hour12: false });
+}
+setInterval(updateClock, 1000);
+updateClock();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Signup — TraffiQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:      #080c10;
+    --bg2:     #0d1219;
+    --bg3:     #121920;
+    --border:  #1e2a35;
+    --border2: #243040;
+    --cyan:    #00e5ff;
+    --green:   #00ff88;
+    --red:     #ff3b5c;
+    --text:    #c8d8e8;
+    --text-dim:#4a6070;
+    --mono:    'Share Tech Mono', monospace;
+    --sans:    'Rajdhani', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(0,229,255,.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,255,.04) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+  }
+
+  body::after {
+    content: '';
+    position: fixed; inset: 0;
+    background: repeating-linear-gradient(
+      0deg, transparent, transparent 2px,
+      rgba(0,0,0,.05) 2px, rgba(0,0,0,.05) 4px
+    );
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  .orb {
+    position: fixed;
+    width: 500px; height: 500px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,255,136,.05) 0%, transparent 70%);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    animation: breathe 6s ease-in-out infinite;
+  }
+  @keyframes breathe {
+    0%,100% { transform: translate(-50%,-50%) scale(1);   opacity: .7; }
+    50%      { transform: translate(-50%,-50%) scale(1.1); opacity: 1;  }
+  }
+
+  .corner {
+    position: fixed;
+    width: 60px; height: 60px;
+    border-color: rgba(0,229,255,.2);
+    border-style: solid;
+    pointer-events: none;
+  }
+  .corner-tl { top: 24px; left: 24px;  border-width: 2px 0 0 2px; }
+  .corner-tr { top: 24px; right: 24px; border-width: 2px 2px 0 0; }
+  .corner-bl { bottom: 24px; left: 24px;  border-width: 0 0 2px 2px; }
+  .corner-br { bottom: 24px; right: 24px; border-width: 0 2px 2px 0; }
+
+  .box {
+    position: relative;
+    z-index: 10;
+    width: 380px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 40px 36px 36px;
+    animation: fadeUp .7s ease both;
+    overflow: hidden;
+  }
+  .box::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--green), transparent);
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  .sys-tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+    margin-bottom: 10px;
+  }
+
+  h2 {
+    font-family: var(--mono);
+    font-size: 20px;
+    font-weight: 400;
+    letter-spacing: 3px;
+    color: var(--green);
+    text-shadow: 0 0 20px rgba(0,255,136,.3);
+    margin-bottom: 28px;
+    text-transform: uppercase;
+  }
+
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, var(--green), transparent);
+    margin-bottom: 28px;
+    opacity: .3;
+  }
+
+  form { display: flex; flex-direction: column; gap: 14px; }
+
+  .input-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    display: block;
+  }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="password"] {
+    width: 100%;
+    padding: 11px 14px;
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: 1px;
+    outline: none;
+    transition: border-color .2s, box-shadow .2s;
+  }
+  input::placeholder { color: var(--text-dim); }
+  input:focus {
+    border-color: var(--green);
+    box-shadow: 0 0 0 3px rgba(0,255,136,.08);
+  }
+
+  button[type="submit"] {
+    margin-top: 6px;
+    width: 100%;
+    padding: 13px;
+    background: transparent;
+    border: 1px solid var(--green);
+    border-radius: 6px;
+    color: var(--green);
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background .2s, box-shadow .2s, transform .15s;
+  }
+  button[type="submit"]:hover {
+    background: rgba(0,255,136,.08);
+    box-shadow: 0 0 20px rgba(0,255,136,.15);
+    transform: translateY(-1px);
+  }
+  button[type="submit"]:active { transform: translateY(0); }
+
+  .message {
+    margin-top: 16px;
+    padding: 10px 14px;
+    background: rgba(255,59,92,.08);
+    border: 1px solid rgba(255,59,92,.3);
+    border-radius: 6px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--red);
+    letter-spacing: 1px;
+    text-align: center;
+  }
+
+  .link {
+    margin-top: 20px;
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-dim);
+    font-family: var(--mono);
+    letter-spacing: 1px;
+  }
+  .link a {
+    color: var(--cyan);
+    text-decoration: none;
+    transition: text-shadow .2s;
+  }
+  .link a:hover { text-shadow: 0 0 10px rgba(0,229,255,.4); }
+
+  .status-bar {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    padding: 8px 24px;
+    border-top: 1px solid var(--border);
+    background: var(--bg2);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    z-index: 10;
+  }
+  .status-left { display: flex; align-items: center; gap: 10px; }
+  .ping { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: ping 2s infinite; }
+  @keyframes ping {
+    0%,100% { box-shadow: 0 0 0 0 rgba(0,255,136,.6); }
+    50%      { box-shadow: 0 0 0 5px rgba(0,255,136,0); }
+  }
+  #clock { color: var(--cyan); letter-spacing: 2px; }
+</style>
+</head>
+
+<body>
+
+<div class="orb"></div>
+<div class="corner corner-tl"></div>
+<div class="corner corner-tr"></div>
+<div class="corner corner-bl"></div>
+<div class="corner corner-br"></div>
+
+<div class="box">
+
+  <div class="sys-tag">// traffiq — new user registration</div>
+  <h2>Create Account</h2>
+  <div class="divider"></div>
+
+  <form action="/signup" method="POST">
+
+    <div>
+      <label class="input-label">Username</label>
+      <input type="text" name="username" placeholder="Enter username" required>
+    </div>
+
+    <div>
+      <label class="input-label">Email</label>
+      <input type="email" name="email" placeholder="Enter email" required>
+    </div>
+
+    <div>
+      <label class="input-label">Password</label>
+      <input type="password" name="password" placeholder="Enter password" required>
+    </div>
+
+    <button type="submit">Signup →</button>
+
+  </form>
+
+  {% if message %}
+  <p class="message">⚠ {{ message }}</p>
+  {% endif %}
+
+  <div class="link">
+    Already have an account? <a href="/login">Login →</a>
+  </div>
+
+</div>
+
+<div class="status-bar">
+  <div class="status-left">
+    <div class="ping"></div>
+    <span>SYSTEM ONLINE</span>
+  </div>
+  <span id="clock">--:--:--</span>
+</div>
+
+<script>
+function updateClock() {
+  document.getElementById('clock').textContent =
+    new Date().toLocaleTimeString('en-IN', { hour12: false });
+}
+setInterval(updateClock, 1000);
+updateClock();
+</script>
+
+</body>
+</html>
