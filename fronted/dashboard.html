@@ -7,819 +7,835 @@
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
-  :root {
-    --bg:       #080c10;
-    --bg2:      #0d1219;
-    --bg3:      #121920;
-    --border:   #1e2a35;
-    --border2:  #243040;
-    --cyan:     #00e5ff;
-    --cyan-dim: #00e5ff22;
-    --green:    #00ff88;
-    --red:      #ff3b5c;
-    --amber:    #ffb800;
-    --purple:   #a855f7;
-    --text:     #c8d8e8;
-    --text-dim: #4a6070;
-    --mono:     'Share Tech Mono', monospace;
-    --sans:     'Rajdhani', sans-serif;
-  }
+:root {
+  --bg:    #080c10;
+  --bg2:   #0d1219;
+  --bg3:   #121920;
+  --bdr:   #1e2a35;
+  --bdr2:  #243040;
+  --cyan:  #00e5ff;
+  --green: #00ff88;
+  --red:   #ff3b5c;
+  --amber: #ffb800;
+  --purp:  #a855f7;
+  --text:  #c8d8e8;
+  --dim:   #4a6070;
+  --mono:  'Share Tech Mono', monospace;
+  --sans:  'Rajdhani', sans-serif;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+}
+body::after {
+  content:'';
+  position:fixed; inset:0;
+  background: repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.04) 2px,rgba(0,0,0,.04) 4px);
+  pointer-events:none;
+  z-index:9999;
+}
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+/* ── SIDEBAR ── */
+.sidebar {
+  width:210px; background:var(--bg2);
+  border-right:1px solid var(--bdr);
+  display:flex; flex-direction:column; flex-shrink:0;
+}
+.logo {
+  padding:22px 20px 18px;
+  font-family:var(--mono); font-size:22px; letter-spacing:3px;
+  color:var(--cyan); text-shadow:0 0 20px var(--cyan);
+  border-bottom:1px solid var(--bdr); position:relative;
+}
+.logo::after { content:'v2.4.1'; position:absolute; bottom:8px; right:14px; font-size:9px; color:var(--dim); }
 
-  body {
-    font-family: var(--sans);
-    background: var(--bg);
-    color: var(--text);
-    display: flex;
-    height: 100vh;
-    overflow: hidden;
-    font-size: 15px;
-  }
+.nav { list-style:none; padding:12px 0; flex:1; }
+.nav li {
+  padding:11px 20px; font-size:14px; font-weight:600;
+  letter-spacing:1.2px; text-transform:uppercase; color:var(--dim);
+  cursor:pointer; border-left:3px solid transparent; transition:all .2s;
+  position:relative; display:flex; align-items:center; gap:10px;
+}
+.nav li:hover { color:var(--text); background:rgba(0,229,255,.04); }
+.nav li.active { color:var(--cyan); background:rgba(0,229,255,.07); border-left-color:var(--cyan); text-shadow:0 0 12px var(--cyan); }
+.nav li.active::after { content:'▶'; position:absolute; right:16px; font-size:8px; opacity:.6; }
+.nav li.nav-out { color:var(--red); }
+.nav li.nav-out:hover { background:rgba(255,59,92,.06); }
 
-  /* ── Scanline overlay ── */
-  body::after {
-    content: '';
-    position: fixed; inset: 0;
-    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,.04) 2px, rgba(0,0,0,.04) 4px);
-    pointer-events: none;
-    z-index: 9999;
-  }
+.sidebar-footer {
+  padding:14px 16px; border-top:1px solid var(--bdr);
+  font-family:var(--mono); font-size:11px;
+}
+.ping-row { display:flex; align-items:center; gap:8px; color:var(--green); }
+.ping { width:7px; height:7px; border-radius:50%; background:var(--green); animation:pingA 2s infinite; }
+@keyframes pingA { 0%,100%{box-shadow:0 0 0 0 rgba(0,255,136,.6)} 50%{box-shadow:0 0 0 6px rgba(0,255,136,0)} }
+.src-tag { font-size:9px; color:var(--dim); margin-top:5px; letter-spacing:1px; }
 
-  /* ══════════════ SIDEBAR ══════════════ */
-  .sidebar {
-    width: 210px;
-    background: var(--bg2);
-    border-right: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    flex-shrink: 0;
-  }
+/* ── MAIN ── */
+.main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
 
-  .logo {
-    padding: 22px 20px 18px;
-    font-family: var(--mono);
-    font-size: 22px;
-    letter-spacing: 3px;
-    color: var(--cyan);
-    border-bottom: 1px solid var(--border);
-    text-shadow: 0 0 20px var(--cyan);
-    position: relative;
-  }
-  .logo::after {
-    content: 'v2.4.1';
-    position: absolute;
-    bottom: 8px; right: 14px;
-    font-size: 9px;
-    color: var(--text-dim);
-    letter-spacing: 1px;
-  }
+header {
+  padding:14px 28px; border-bottom:1px solid var(--bdr);
+  background:var(--bg2); display:flex; align-items:center;
+  justify-content:space-between; flex-shrink:0;
+}
+header h1 { font-size:19px; font-weight:700; letter-spacing:1px; color:#e8f4ff; }
+.hdr-right { display:flex; align-items:center; gap:20px; }
+#clock { font-family:var(--mono); font-size:13px; color:var(--cyan); letter-spacing:2px; }
+.status-badge {
+  padding:5px 14px; background:rgba(0,255,136,.1);
+  border:1px solid rgba(0,255,136,.3); border-radius:4px;
+  font-size:12px; font-weight:600; color:var(--green); letter-spacing:1px;
+}
 
-  .nav { list-style: none; padding: 12px 0; flex: 1; }
-  .nav li {
-    padding: 11px 20px;
-    font-size: 14px;
-    font-weight: 600;
-    letter-spacing: 1.2px;
-    text-transform: uppercase;
-    color: var(--text-dim);
-    cursor: pointer;
-    transition: all .2s;
-    border-left: 3px solid transparent;
-    position: relative;
-  }
-  .nav li:hover { color: var(--text); background: rgba(0,229,255,.04); }
-  .nav li.active {
-    color: var(--cyan);
-    background: rgba(0,229,255,.07);
-    border-left-color: var(--cyan);
-    text-shadow: 0 0 12px var(--cyan);
-  }
-  .nav li.active::before {
-    content: '▶';
-    position: absolute;
-    right: 16px;
-    font-size: 8px;
-    opacity: .6;
-  }
+/* ── PAGES ── */
+.page { display:none; flex:1; flex-direction:column; overflow:hidden; min-height:0; }
+.page.active { display:flex; }
 
-  .sidebar-footer {
-    padding: 14px 16px;
-    border-top: 1px solid var(--border);
-    display: flex; align-items: center; gap: 8px;
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--green);
-  }
-  .ping { width: 7px; height: 7px; border-radius: 50%; background: var(--green); animation: ping 2s infinite; }
-  @keyframes ping { 0%,100%{box-shadow:0 0 0 0 rgba(0,255,136,.6)} 50%{box-shadow:0 0 0 6px rgba(0,255,136,0)} }
+/* ══════════════════════════════════════
+   SIMULATION PAGE
+══════════════════════════════════════ */
+.sim-topbar {
+  padding:10px 22px; border-bottom:1px solid var(--bdr);
+  background:var(--bg2); display:flex; align-items:center;
+  justify-content:space-between; flex-shrink:0;
+}
+.mode-toggle {
+  display:flex; background:var(--bg3);
+  border:1px solid var(--bdr2); border-radius:8px; padding:3px; gap:3px;
+}
+.mode-btn {
+  padding:6px 18px; border-radius:6px;
+  font-family:var(--mono); font-size:11px; letter-spacing:1px;
+  cursor:pointer; border:none; background:transparent; color:var(--dim); transition:all .25s;
+}
+.mode-btn.m-normal { background:rgba(0,229,255,.12); color:var(--cyan); }
+.mode-btn.m-smart  { background:rgba(168,85,247,.18); color:var(--purp); }
 
-  /* ══════════════ MAIN ══════════════ */
-  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.sim-meta { font-family:var(--mono); font-size:11px; color:var(--dim); display:flex; gap:20px; }
+.sim-meta b { color:var(--cyan); }
 
-  header {
-    padding: 14px 28px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: var(--bg2);
-    flex-shrink: 0;
-  }
-  header h1 {
-    font-size: 19px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    color: #e8f4ff;
-  }
-  .header-right { display: flex; align-items: center; gap: 20px; }
-  #clock {
-    font-family: var(--mono);
-    font-size: 13px;
-    color: var(--cyan);
-    letter-spacing: 2px;
-  }
-  .status-badge {
-    padding: 5px 14px;
-    background: rgba(0,255,136,.1);
-    border: 1px solid rgba(0,255,136,.3);
-    border-radius: 4px;
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--green);
-    letter-spacing: 1px;
-  }
+/* Smart banner */
+.smart-banner {
+  display:none; padding:8px 22px;
+  background:rgba(168,85,247,.08); border-bottom:1px solid rgba(168,85,247,.2);
+  font-family:var(--mono); font-size:11px; color:var(--purp);
+  align-items:center; gap:10px; flex-shrink:0;
+}
+.smart-banner.show { display:flex; }
 
-  /* ══════════════ CONTENT ══════════════ */
-  .content { flex: 1; padding: 18px 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; }
+/* ── CONTENT AREA ── */
+.sim-content {
+  flex:1; display:flex; gap:0; overflow:hidden; min-height:0;
+}
 
-  /* ── Stat Cards ── */
-  .cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; flex-shrink: 0; }
+/* LEFT — lane cards */
+.lanes-area {
+  flex:1; padding:16px 18px; overflow-y:auto;
+}
 
-  .card {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 16px 18px;
-    position: relative;
-    overflow: hidden;
-    transition: border-color .3s;
-  }
-  .card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-  }
-  .card.c-cyan::before { background: linear-gradient(90deg, var(--cyan), transparent); }
-  .card.c-purple::before { background: linear-gradient(90deg, var(--purple), transparent); }
-  .card.c-green::before { background: linear-gradient(90deg, var(--green), transparent); }
-  .card.c-red::before { background: linear-gradient(90deg, var(--red), transparent); }
+/* Lane grid — same as old dashboard */
+.lane-grid {
+  display:grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap:12px;
+}
 
-  .card-label {
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    color: var(--text-dim);
-    margin-bottom: 10px;
-  }
-  .card-value {
-    font-family: var(--mono);
-    font-size: 32px;
-    line-height: 1;
-  }
-  .card.c-cyan .card-value { color: var(--cyan); text-shadow: 0 0 16px rgba(0,229,255,.4); }
-  .card.c-purple .card-value { color: var(--purple); text-shadow: 0 0 16px rgba(168,85,247,.4); }
-  .card.c-green .card-value { color: var(--green); text-shadow: 0 0 16px rgba(0,255,136,.4); }
-  .card.c-red .card-value { color: var(--red); text-shadow: 0 0 16px rgba(255,59,92,.4); }
-  .card-sub { font-size: 11px; color: var(--text-dim); margin-top: 6px; }
+/* ── LANE CARD — exact old style ── */
+.lane-card {
+  background:var(--bg3);
+  border:1px solid var(--bdr);
+  border-radius:8px;
+  padding:14px;
+  position:relative;
+  transition:border-color .3s, background .3s;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+}
+.lane-card.is-green {
+  border-color:rgba(0,255,136,.4);
+  background:rgba(0,255,136,.04);
+  box-shadow:0 0 16px rgba(0,255,136,.07);
+}
+.lane-card.is-emg {
+  border-color:var(--red);
+  background:rgba(255,59,92,.05);
+  animation:emgFlash 1s infinite;
+}
+@keyframes emgFlash { 0%,100%{background:rgba(255,59,92,.05)} 50%{background:rgba(255,59,92,.1)} }
 
-  .card.emergency-on {
-    border-color: var(--red) !important;
-    animation: emergency-flash 1s infinite;
-  }
-  @keyframes emergency-flash {
-    0%,100%{background: var(--bg2)} 50%{background: rgba(255,59,92,.08)}
-  }
+.lane-card-title {
+  font-family:var(--mono);
+  font-size:13px;
+  letter-spacing:1px;
+  color:var(--cyan);
+  align-self:flex-start;
+  margin-bottom:2px;
+}
+.lane-card-id {
+  font-family:var(--mono);
+  font-size:9px;
+  color:var(--dim);
+  align-self:flex-start;
+  margin-bottom:6px;
+  letter-spacing:.5px;
+}
 
-  /* ── Grid ── */
-  .grid { display: grid; grid-template-columns: 1fr 420px; gap: 16px; flex: 1; min-height: 0; }
+/* Vertical traffic light — same as screenshot */
+.traffic-light {
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  background:#070f18;
+  border:1px solid var(--bdr2);
+  border-radius:14px;
+  padding:6px 5px;
+  margin:4px 0 8px;
+  width:28px;
+}
+.tl-bulb {
+  width:18px; height:18px;
+  border-radius:50%;
+  background:#1a2535;
+  transition:background .35s, box-shadow .35s;
+}
+.tl-bulb.on-red   { background:var(--red);   box-shadow:0 0 8px var(--red),  0 0 20px rgba(255,59,92,.45); }
+.tl-bulb.on-amber { background:var(--amber);  box-shadow:0 0 8px var(--amber),0 0 20px rgba(255,184,0,.45); }
+.tl-bulb.on-green { background:var(--green);  box-shadow:0 0 8px var(--green),0 0 20px rgba(0,255,136,.45); }
 
-  /* ── Panels ── */
-  .panel {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-  .panel-head {
-    padding: 12px 18px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-shrink: 0;
-  }
-  .panel-title {
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    color: var(--text);
-  }
-  .panel-tag {
-    font-family: var(--mono);
-    font-size: 10px;
-    padding: 3px 9px;
-    border: 1px solid var(--border2);
-    border-radius: 3px;
-    color: var(--text-dim);
-  }
-  .panel-body { flex: 1; overflow-y: auto; padding: 14px; }
+/* Timer display */
+.lane-timer {
+  font-family:var(--mono);
+  font-size:22px;
+  font-weight:700;
+  letter-spacing:1px;
+  margin-top:2px;
+}
+.lane-timer.t-red   { color:var(--red); }
+.lane-timer.t-amber { color:var(--amber); }
+.lane-timer.t-green { color:var(--green); }
 
-  /* ── Lane Cards ── */
-  .lane-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
+.phase-lbl {
+  font-family:var(--mono);
+  font-size:10px;
+  letter-spacing:2px;
+  color:var(--dim);
+  text-transform:uppercase;
+  margin-bottom:8px;
+}
 
-  .lane-card {
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 12px;
-    position: relative;
-    transition: border-color .3s, background .3s;
-  }
-  .lane-card.active-lane { border-color: rgba(0,229,255,.3); }
-  .lane-card.emergency-lane {
-    border-color: var(--red);
-    background: rgba(255,59,92,.06);
-    animation: emergency-flash 1s infinite;
-  }
+/* Stats */
+.lane-stats {
+  width:100%;
+  font-size:12px;
+  border-top:1px solid var(--bdr);
+  padding-top:8px;
+}
+.lane-stat-row {
+  display:flex;
+  justify-content:space-between;
+  padding:3px 0;
+}
+.ls-label { color:var(--dim); }
+.ls-val   { font-family:var(--mono); color:var(--text); }
 
-  .lane-name {
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--text-dim);
-    margin-bottom: 8px;
-    letter-spacing: 1px;
-  }
+/* Priority bar (smart mode) */
+.pri-row {
+  display:none;
+  width:100%;
+  align-items:center;
+  gap:6px;
+  margin-top:6px;
+  font-size:10px;
+}
+.pri-row.show { display:flex; }
+.pri-label { color:var(--dim); white-space:nowrap; }
+.pri-track { flex:1; height:3px; background:var(--bdr2); border-radius:2px; overflow:hidden; }
+.pri-bar   { height:100%; background:var(--purp); border-radius:2px; transition:width .5s; }
+.pri-score { font-family:var(--mono); font-size:10px; color:var(--purp); min-width:30px; text-align:right; }
 
-  /* Traffic Light */
-  .traffic-light {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-    margin: 0 auto 10px;
-    width: 22px;
-    background: #0a0f14;
-    border: 1px solid var(--border2);
-    border-radius: 11px;
-    padding: 4px;
-  }
-  .tl-bulb {
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-    background: #1a2030;
-    transition: background .4s, box-shadow .4s;
-  }
-  .tl-bulb.on-red    { background: var(--red);   box-shadow: 0 0 8px var(--red),   0 0 20px rgba(255,59,92,.4); }
-  .tl-bulb.on-amber  { background: var(--amber);  box-shadow: 0 0 8px var(--amber), 0 0 20px rgba(255,184,0,.4); }
-  .tl-bulb.on-green  { background: var(--green);  box-shadow: 0 0 8px var(--green), 0 0 20px rgba(0,255,136,.4); }
+.emg-badge {
+  position:absolute; top:8px; right:8px;
+  font-size:9px; padding:2px 6px; background:var(--red);
+  color:#fff; border-radius:3px; font-weight:700; letter-spacing:1px;
+  animation:pingA 1s infinite;
+}
 
-  .lane-stats { font-size: 12px; }
-  .lane-stat-row { display: flex; justify-content: space-between; padding: 2px 0; }
-  .lane-stat-label { color: var(--text-dim); }
-  .lane-stat-val { font-family: var(--mono); color: var(--text); }
+/* RIGHT — chart + alerts */
+.right-col {
+  width:360px; display:flex; flex-direction:column;
+  border-left:1px solid var(--bdr); flex-shrink:0;
+}
+.r-panel {
+  display:flex; flex-direction:column;
+  border-bottom:1px solid var(--bdr);
+}
+.r-panel:last-child { border-bottom:none; flex:1; min-height:0; }
+.r-head {
+  padding:10px 16px; border-bottom:1px solid var(--bdr);
+  font-size:12px; font-weight:700; letter-spacing:1px;
+  text-transform:uppercase; display:flex; justify-content:space-between; align-items:center;
+  flex-shrink:0;
+}
+.r-tag { font-family:var(--mono); font-size:10px; color:var(--dim); padding:2px 8px; border:1px solid var(--bdr2); border-radius:3px; }
+.r-body { flex:1; padding:10px; position:relative; min-height:0; }
+.r-body.chart-body { height:200px; flex:none; }
 
-  .lane-timer {
-    margin-top: 8px;
-    font-family: var(--mono);
-    font-size: 20px;
-    font-weight: 700;
-    text-align: center;
-    letter-spacing: 1px;
-  }
-  .lane-timer.red   { color: var(--red); }
-  .lane-timer.amber { color: var(--amber); }
-  .lane-timer.green { color: var(--green); }
+/* Alerts list */
+.alerts-scroll { flex:1; overflow-y:auto; min-height:0; }
+.alert-row {
+  display:flex; align-items:center; gap:8px;
+  padding:8px 14px; border-bottom:1px solid var(--bdr);
+  font-size:11px; animation:slideIn .3s ease;
+}
+@keyframes slideIn { from{opacity:0;transform:translateX(-6px)} to{opacity:1;transform:none} }
+.alert-row:last-child { border-bottom:none; }
+.a-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+.al-crit .a-dot { background:var(--red); box-shadow:0 0 5px var(--red); animation:pingA 1s infinite; }
+.al-warn .a-dot { background:var(--amber); }
+.al-ok   .a-dot { background:var(--green); }
+.a-time { margin-left:auto; font-family:var(--mono); font-size:9px; color:var(--dim); }
+.no-alert-msg { padding:14px; text-align:center; font-family:var(--mono); font-size:11px; color:var(--dim); }
 
-  .phase-label {
-    text-align: center;
-    font-size: 10px;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    margin-top: 3px;
-    color: var(--text-dim);
-  }
+/* ══════════════════════════════════════
+   ANALYTICS PAGE
+══════════════════════════════════════ */
+.analytics-body { flex:1; padding:18px 22px; overflow-y:auto; display:flex; flex-direction:column; gap:14px; }
+.stat-cards { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; flex-shrink:0; }
+.sc {
+  background:var(--bg2); border:1px solid var(--bdr);
+  border-radius:8px; padding:14px 16px; position:relative; overflow:hidden;
+}
+.sc::before { content:''; position:absolute; top:0;left:0;right:0;height:2px; }
+.sc.cc::before { background:linear-gradient(90deg,var(--cyan),transparent); }
+.sc.cp::before { background:linear-gradient(90deg,var(--purp),transparent); }
+.sc.cg::before { background:linear-gradient(90deg,var(--green),transparent); }
+.sc.cr::before { background:linear-gradient(90deg,var(--red),transparent); }
+.sc-lbl { font-size:10px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:var(--dim); margin-bottom:8px; }
+.sc-val { font-family:var(--mono); font-size:30px; line-height:1; }
+.sc.cc .sc-val { color:var(--cyan); } .sc.cp .sc-val { color:var(--purp); }
+.sc.cg .sc-val { color:var(--green); } .sc.cr .sc-val { color:var(--red); }
+.sc-sub { font-size:11px; color:var(--dim); margin-top:5px; }
+.charts-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; flex:1; min-height:0; }
+.a-panel {
+  background:var(--bg2); border:1px solid var(--bdr);
+  border-radius:10px; overflow:hidden; display:flex; flex-direction:column;
+}
+.a-head {
+  padding:10px 16px; border-bottom:1px solid var(--bdr);
+  font-size:12px; font-weight:700; letter-spacing:1px; text-transform:uppercase;
+  display:flex; justify-content:space-between; align-items:center; flex-shrink:0;
+}
+.a-tag { font-family:var(--mono); font-size:10px; color:var(--dim); padding:2px 8px; border:1px solid var(--bdr2); border-radius:3px; }
+.a-body { flex:1; padding:12px; position:relative; min-height:160px; }
+.a-body.no-pad { padding:0; overflow-y:auto; }
 
-  .emg-badge {
-    position: absolute;
-    top: 8px; right: 8px;
-    font-size: 9px;
-    padding: 2px 6px;
-    background: var(--red);
-    color: #fff;
-    border-radius: 3px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    animation: ping 1s infinite;
-  }
-
-  /* ── Right column ── */
-  .right-col { display: flex; flex-direction: column; gap: 16px; min-height: 0; }
-
-  .chart-panel { flex: 1; min-height: 0; }
-  .chart-wrap { height: 100%; position: relative; }
-
-  /* ── Loading / Error ── */
-  .loading-overlay {
-    position: absolute; inset: 0;
-    display: flex; align-items: center; justify-content: center;
-    flex-direction: column; gap: 8px;
-    background: rgba(8,12,16,.8);
-    font-family: var(--mono);
-    font-size: 12px;
-    color: var(--text-dim);
-    border-radius: 8px;
-    z-index: 10;
-  }
-  .loading-overlay.hidden { display: none; }
-  .spinner {
-    width: 28px; height: 28px;
-    border: 2px solid var(--border2);
-    border-top-color: var(--cyan);
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  .error-state { color: var(--red); text-align: center; padding: 20px; font-family: var(--mono); font-size: 12px; }
-  .error-state span { display: block; font-size: 20px; margin-bottom: 8px; }
-
-  /* ── Alerts ── */
-  .alerts-panel { flex-shrink: 0; }
-  #alerts-list { max-height: 130px; overflow-y: auto; }
-  .alert-item {
-    display: flex; align-items: center; gap: 10px;
-    padding: 8px 12px;
-    border-bottom: 1px solid var(--border);
-    font-size: 12px;
-    animation: slideIn .3s ease;
-  }
-  @keyframes slideIn { from{opacity:0;transform:translateX(-8px)} to{opacity:1;transform:none} }
-  .alert-item:last-child { border-bottom: none; }
-  .alert-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-  .a-crit .alert-dot { background: var(--red); box-shadow: 0 0 6px var(--red); animation: ping 1s infinite; }
-  .a-warn .alert-dot { background: var(--amber); }
-  .a-ok   .alert-dot { background: var(--green); }
-  .alert-time { margin-left: auto; font-family: var(--mono); font-size: 10px; color: var(--text-dim); }
-  .no-alerts { padding: 16px; text-align: center; color: var(--text-dim); font-size: 12px; font-family: var(--mono); }
-
-  /* ── Scrollbar ── */
-  ::-webkit-scrollbar { width: 4px; }
-  ::-webkit-scrollbar-track { background: var(--bg); }
-  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+::-webkit-scrollbar { width:3px; }
+::-webkit-scrollbar-track { background:var(--bg); }
+::-webkit-scrollbar-thumb { background:var(--bdr2); border-radius:2px; }
 </style>
 </head>
-
 <body>
 
 <!-- SIDEBAR -->
 <div class="sidebar">
   <div class="logo">TRAFFIQ</div>
   <ul class="nav">
-    <li class="active">Dashboard</li>
-    <li>Simulation</li>
-    <li>Analytics</li>
-    <li>Alerts</li>
-    <li>Settings</li>
+    <li class="active" onclick="navTo('sim',this)">
+      <span>⬡</span> Simulation
+    </li>
+    <li onclick="navTo('analytics',this)">
+      <span>◈</span> Analytics
+    </li>
+    <li class="nav-out" onclick="location.href='/logout'">
+      <span>⏻</span> Logout
+    </li>
   </ul>
   <div class="sidebar-footer">
-    <div class="ping"></div>
-    SUMO CONNECTED
+    <div class="ping-row">
+      <div class="ping" id="conn-ping"></div>
+      <span id="conn-lbl">CONNECTED</span>
+    </div>
+    <div class="src-tag" id="src-tag">SOURCE: —</div>
   </div>
 </div>
 
 <!-- MAIN -->
 <div class="main">
-
   <header>
     <h1>Smart Traffic Control Dashboard</h1>
-    <div class="header-right">
+    <div class="hdr-right">
       <span id="clock">--:--:--</span>
       <span class="status-badge">● SYSTEM ONLINE</span>
     </div>
   </header>
 
-  <div class="content">
+  <!-- ════ SIMULATION PAGE ════ -->
+  <div class="page active" id="page-sim">
 
-    <!-- Stat Cards -->
-    <div class="cards">
-      <div class="card c-cyan">
-        <div class="card-label">Total Vehicles</div>
-        <div class="card-value" id="vehicleCount">--</div>
-        <div class="card-sub" id="vehicle-sub">Fetching...</div>
+    <div class="sim-topbar">
+      <div class="mode-toggle">
+        <button class="mode-btn m-normal" id="btn-normal" onclick="setMode('normal')">⬡ Normal Mode</button>
+        <button class="mode-btn"          id="btn-smart"  onclick="setMode('smart')">⚡ Smart Algorithm</button>
       </div>
-      <div class="card c-purple">
-        <div class="card-label">Total Lanes</div>
-        <div class="card-value" id="laneCount">--</div>
-        <div class="card-sub">Monitored lanes</div>
-      </div>
-      <div class="card c-green">
-        <div class="card-label">Active Lanes</div>
-        <div class="card-value" id="activeLanes">--</div>
-        <div class="card-sub" id="active-sub">Lanes with traffic</div>
-      </div>
-      <div class="card c-red" id="emergency-card">
-        <div class="card-label">Emergency</div>
-        <div class="card-value" id="emergency">--</div>
-        <div class="card-sub" id="emergency-sub">Checking...</div>
+      <div class="sim-meta">
+        <span>Active: <b id="meta-active">—</b></span>
+        <span>Step: <b id="meta-step">0</b></span>
+        <span id="meta-src">SOURCE: —</span>
       </div>
     </div>
 
-    <!-- Main Grid -->
-    <div class="grid" style="flex:1;min-height:0;">
+    <div class="smart-banner" id="smart-banner">
+      <span>⚡</span>
+      <span id="smart-reason">Analysing lanes…</span>
+    </div>
 
-      <!-- LEFT: Lane Simulation Panel -->
-      <div class="panel simulation">
-        <div class="panel-head">
-          <span class="panel-title">Lane Simulation — Traffic Signals</span>
-          <span class="panel-tag" id="refresh-tag">LIVE</span>
-        </div>
-        <div class="panel-body" style="position:relative;">
-          <div class="loading-overlay" id="sim-loading">
-            <div class="spinner"></div>
-            <span>Connecting to SUMO...</span>
-          </div>
-          <div class="lane-grid" id="laneData"></div>
+    <div class="sim-content">
+
+      <!-- Lane cards area -->
+      <div class="lanes-area">
+        <div class="lane-grid" id="lane-grid">
+          <!-- filled by JS -->
         </div>
       </div>
 
-      <!-- RIGHT -->
+      <!-- Right panel: chart + alerts -->
       <div class="right-col">
-
-        <!-- Chart -->
-        <div class="panel chart-panel">
-          <div class="panel-head">
-            <span class="panel-title">Traffic Flow</span>
-            <span class="panel-tag">veh / cycle</span>
+        <div class="r-panel">
+          <div class="r-head">
+            Traffic Flow <span class="r-tag">veh/cycle</span>
           </div>
-          <div class="panel-body" style="padding:10px;">
-            <div class="chart-wrap">
-              <canvas id="trafficChart"></canvas>
-            </div>
+          <div class="r-body chart-body">
+            <canvas id="chart-flow"></canvas>
           </div>
         </div>
-
-        <!-- Alerts -->
-        <div class="panel alerts-panel">
-          <div class="panel-head">
-            <span class="panel-title">System Alerts</span>
-            <span class="panel-tag" id="alert-count">0</span>
+        <div class="r-panel" style="flex:1;min-height:0;display:flex;flex-direction:column;">
+          <div class="r-head">
+            System Alerts <span class="r-tag" id="alert-count">0</span>
           </div>
-          <div id="alerts-list">
-            <div class="no-alerts">No active alerts</div>
+          <div class="alerts-scroll" id="alerts-list">
+            <div class="no-alert-msg">No alerts</div>
           </div>
         </div>
-
       </div>
-    </div>
 
+    </div>
   </div>
+
+  <!-- ════ ANALYTICS PAGE ════ -->
+  <div class="page" id="page-analytics">
+    <div class="analytics-body">
+
+      <div class="stat-cards">
+        <div class="sc cc">
+          <div class="sc-lbl">Total Vehicles</div>
+          <div class="sc-val" id="a-total">--</div>
+          <div class="sc-sub" id="a-total-sub">Loading…</div>
+        </div>
+        <div class="sc cp">
+          <div class="sc-lbl">Total Lanes</div>
+          <div class="sc-val" id="a-lanes">--</div>
+          <div class="sc-sub">Monitored</div>
+        </div>
+        <div class="sc cg">
+          <div class="sc-lbl">Active Lane</div>
+          <div class="sc-val" id="a-active" style="font-size:17px;padding-top:6px">--</div>
+          <div class="sc-sub" id="a-mode-lbl">Normal Mode</div>
+        </div>
+        <div class="sc cr" id="a-emg-card">
+          <div class="sc-lbl">Emergency</div>
+          <div class="sc-val" id="a-emg">NONE</div>
+          <div class="sc-sub" id="a-emg-sub">All clear</div>
+        </div>
+      </div>
+
+      <div class="charts-grid">
+        <div class="a-panel">
+          <div class="a-head">Traffic Flow <span class="a-tag">veh/cycle</span></div>
+          <div class="a-body"><canvas id="chart-flow-a"></canvas></div>
+        </div>
+        <div class="a-panel">
+          <div class="a-head">Vehicles Per Lane <span class="a-tag">current</span></div>
+          <div class="a-body"><canvas id="chart-bar"></canvas></div>
+        </div>
+        <div class="a-panel">
+          <div class="a-head">Priority Scores <span class="a-tag">smart algo</span></div>
+          <div class="a-body"><canvas id="chart-pri"></canvas></div>
+        </div>
+        <div class="a-panel">
+          <div class="a-head">Alerts Log <span class="a-tag" id="a-alert-count">0</span></div>
+          <div class="a-body no-pad" id="a-alerts-list">
+            <div class="no-alert-msg">No alerts</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
 </div>
 
 <script>
-// ═══════════════════════════════════════════
-//  CLOCK
-// ═══════════════════════════════════════════
-function updateClock() {
-  const n = new Date();
+/* ══════════════════
+   STATE
+══════════════════ */
+let currentMode = 'normal';
+let lastData    = null;
+let alertLog    = [];
+let firstLoad   = true;
+let lastEmg     = false;
+let laneOrder   = {};   // lid → display number
+
+const laneTimers = {};
+const FIXED_GREEN = 20;
+const DURATIONS   = { green: FIXED_GREEN, amber: 5, red: 25 };
+
+/* Clock */
+setInterval(() => {
   document.getElementById('clock').textContent =
-    n.toLocaleTimeString('en-IN', { hour12: false });
-}
-setInterval(updateClock, 1000);
-updateClock();
+    new Date().toLocaleTimeString('en-IN',{hour12:false});
+}, 1000);
 
-// ═══════════════════════════════════════════
-//  TRAFFIC LIGHT STATE MACHINE PER LANE
-//  Each lane keeps its own phase + countdown
-//  If API sends phase info → use it
-//  Otherwise → derive from vehicle count
-// ═══════════════════════════════════════════
-const laneTimers = {};   // lane_id → { phase, countdown, interval }
-
-function getPhaseFromAPI(laneInfo) {
-  // If your SUMO API sends phase data, map it here
-  if (laneInfo.phase !== undefined) return laneInfo.phase;        // 'green'|'amber'|'red'
-  if (laneInfo.signal !== undefined) return laneInfo.signal;
-  if (laneInfo.light !== undefined)  return laneInfo.light;
-  return null;  // will auto-derive
+/* ══════════════════
+   NAV
+══════════════════ */
+function navTo(page, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav li').forEach(l => l.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  if (el) el.classList.add('active');
 }
 
-function derivePhase(vehicles) {
-  // Fallback: heavy traffic → green, no traffic → red
-  if (vehicles > 8) return 'green';
-  if (vehicles > 3) return 'amber';
-  return 'red';
+/* ══════════════════
+   MODE
+══════════════════ */
+function setMode(mode) {
+  currentMode = mode;
+  document.getElementById('btn-normal').className = 'mode-btn' + (mode==='normal' ? ' m-normal':'');
+  document.getElementById('btn-smart').className  = 'mode-btn' + (mode==='smart'  ? ' m-smart' :'');
+  document.getElementById('smart-banner').classList.toggle('show', mode==='smart');
+  document.querySelectorAll('.pri-row').forEach(el => el.classList.toggle('show', mode==='smart'));
+  document.getElementById('a-mode-lbl').textContent = mode==='normal' ? 'Normal Mode' : 'Smart Mode';
+  if (lastData) renderAll(lastData);
 }
 
-function initLaneTimer(laneId, phase) {
-  if (laneTimers[laneId]) {
-    clearInterval(laneTimers[laneId].interval);
-  }
-  const durations = { green: 30, amber: 5, red: 25 };
-  const timer = {
-    phase,
-    countdown: durations[phase] || 30,
-    interval: null
-  };
-  timer.interval = setInterval(() => {
-    timer.countdown--;
-    if (timer.countdown <= 0) {
-      const next = { green: 'amber', amber: 'red', red: 'green' };
-      timer.phase = next[timer.phase];
-      timer.countdown = durations[timer.phase];
+/* ══════════════════
+   TIMERS
+   KEY LOGIC:
+   - If TraCI sends real phase → force that phase on the card
+   - If mock/no phase → use fixed cycle client timer
+══════════════════ */
+function initTimer(lid, phase, countdown) {
+  if (laneTimers[lid]) clearInterval(laneTimers[lid].iv);
+  const t = { phase, countdown: countdown || DURATIONS[phase] || FIXED_GREEN, iv: null };
+  t.iv = setInterval(() => {
+    t.countdown--;
+    if (t.countdown <= 0) {
+      const nxt = {green:'amber',amber:'red',red:'green'};
+      t.phase     = nxt[t.phase];
+      t.countdown = DURATIONS[t.phase];
     }
-    updateLaneTimerUI(laneId, timer);
+    applyTimerToCard(lid, t);
   }, 1000);
-  laneTimers[laneId] = timer;
-  return timer;
+  laneTimers[lid] = t;
+  return t;
 }
 
-function updateLaneTimerUI(laneId, timer) {
-  const card = document.querySelector(`.lane-card[data-lane="${laneId}"]`);
+function applyTimerToCard(lid, t) {
+  const card = document.querySelector(`.lane-card[data-lane="${lid}"]`);
   if (!card) return;
-  const timerEl  = card.querySelector('.lane-timer');
-  const phaseEl  = card.querySelector('.phase-label');
-  const bulbRed   = card.querySelector('.tl-red');
-  const bulbAmber = card.querySelector('.tl-amber');
-  const bulbGreen = card.querySelector('.tl-green');
-  if (!timerEl) return;
 
-  bulbRed.className   = 'tl-bulb tl-red'   + (timer.phase === 'red'   ? ' on-red'   : '');
-  bulbAmber.className = 'tl-bulb tl-amber'  + (timer.phase === 'amber' ? ' on-amber' : '');
-  bulbGreen.className = 'tl-bulb tl-green'  + (timer.phase === 'green' ? ' on-green' : '');
+  // Bulbs
+  const bR = card.querySelector('.tl-red');
+  const bA = card.querySelector('.tl-amber');
+  const bG = card.querySelector('.tl-green');
+  if (bR) bR.className = 'tl-bulb tl-red'   + (t.phase==='red'   ? ' on-red'   : '');
+  if (bA) bA.className = 'tl-bulb tl-amber'  + (t.phase==='amber' ? ' on-amber' : '');
+  if (bG) bG.className = 'tl-bulb tl-green'  + (t.phase==='green' ? ' on-green' : '');
 
-  timerEl.textContent  = timer.countdown + 's';
-  timerEl.className    = 'lane-timer ' + timer.phase;
-  phaseEl.textContent  = timer.phase.toUpperCase();
+  // Timer text
+  const timerEl = card.querySelector('.lane-timer');
+  const phaseEl = card.querySelector('.phase-lbl');
+  if (timerEl) { timerEl.textContent = t.countdown + 's'; timerEl.className = 'lane-timer t-'+t.phase; }
+  if (phaseEl) phaseEl.textContent = t.phase.toUpperCase();
 }
 
-// ═══════════════════════════════════════════
-//  CHART
-// ═══════════════════════════════════════════
-const chartLabels = [];
-const chartData   = [];
-let chart;
+/* ══════════════════
+   RENDER LANE CARDS
+══════════════════ */
+function renderLanes(data) {
+  const lanes      = data.lanes || {};
+  const laneIds    = Object.keys(lanes);
+  const activeNorm = data.normal_active_lane;
+  const activeSmart= data.smart_active_lane;
+  const activeLane = currentMode==='normal' ? activeNorm : activeSmart;
+  const maxPri     = Math.max(...laneIds.map(id => lanes[id].priority_score||0), 1);
+  const grid       = document.getElementById('lane-grid');
 
-function initChart() {
-  const ctx = document.getElementById('trafficChart').getContext('2d');
-  chart = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: chartLabels,
-      datasets: [{
-        label: 'Total Vehicles',
-        data: chartData,
-        borderColor: '#00e5ff',
-        backgroundColor: 'rgba(0,229,255,.08)',
-        borderWidth: 2,
-        pointRadius: 3,
-        pointBackgroundColor: '#00e5ff',
-        fill: true,
-        tension: 0.4
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      animation: { duration: 400 },
-      plugins: { legend: { display: false } },
-      scales: {
-        x: {
-          ticks: { color: '#4a6070', font: { family: "'Share Tech Mono'", size: 10 }, maxTicksLimit: 8, autoSkip: true },
-          grid:  { color: '#1e2a35' }
-        },
-        y: {
-          ticks: { color: '#4a6070', font: { family: "'Share Tech Mono'", size: 10 } },
-          grid:  { color: '#1e2a35' },
-          beginAtZero: true
-        }
+  // Assign lane numbers once
+  laneIds.forEach((lid,i) => { if(!laneOrder[lid]) laneOrder[lid] = i+1; });
+
+  // Remove stale cards
+  [...grid.querySelectorAll('.lane-card')].forEach(c => {
+    if (!lanes[c.dataset.lane]) {
+      if (laneTimers[c.dataset.lane]) clearInterval(laneTimers[c.dataset.lane].iv);
+      c.remove();
+    }
+  });
+
+  laneIds.forEach(lid => {
+    const info      = lanes[lid];
+    const vehicles  = info.vehicles       || 0;
+    const emergency = info.emergency      || false;
+    const priority  = info.priority_score || 0;
+    const waitTime  = info.wait_time      || 0;
+    const apiPhase  = info.phase;   // real TraCI phase: 'green'|'amber'|'red'|null
+    const isGreen   = lid === activeLane;
+    const priPct    = Math.round(priority / maxPri * 100);
+    const dispNum   = laneOrder[lid] || '?';
+    const dispName  = `Lane ${dispNum}`;
+
+    /* ── TIMER SYNC ──
+       If API gives real phase from TraCI → force-sync the card
+       If mock (apiPhase null) → use fixed-cycle client timer
+    */
+    if (apiPhase) {
+      // Real SUMO data: force phase to what SUMO says
+      if (!laneTimers[lid]) {
+        initTimer(lid, apiPhase, DURATIONS[apiPhase]);
+      } else if (laneTimers[lid].phase !== apiPhase) {
+        // Phase changed in SUMO → update immediately
+        clearInterval(laneTimers[lid].iv);
+        delete laneTimers[lid];
+        initTimer(lid, apiPhase, DURATIONS[apiPhase]);
+      }
+    } else {
+      // Mock mode: fixed cycle
+      if (!laneTimers[lid]) {
+        initTimer(lid, isGreen ? 'green' : 'red', isGreen ? (info.normal_green_time || FIXED_GREEN) : null);
+      } else if (isGreen && laneTimers[lid].phase !== 'green') {
+        clearInterval(laneTimers[lid].iv);
+        delete laneTimers[lid];
+        initTimer(lid, 'green', info.normal_green_time || FIXED_GREEN);
       }
     }
-  });
-}
 
-function pushChartPoint(total) {
-  const t = new Date().toLocaleTimeString('en-IN', { hour12: false, hour:'2-digit', minute:'2-digit', second:'2-digit' });
-  chartLabels.push(t);
-  chartData.push(total);
-  if (chartLabels.length > 20) { chartLabels.shift(); chartData.shift(); }
-  chart.update();
-}
+    const timer  = laneTimers[lid];
+    const tClass = 't-' + timer.phase;
 
-// ═══════════════════════════════════════════
-//  ALERTS
-// ═══════════════════════════════════════════
-const alertLog = [];
+    let card = grid.querySelector(`.lane-card[data-lane="${lid}"]`);
 
-function addAlert(type, msg) {
-  const time = new Date().toLocaleTimeString('en-IN', { hour12: false, hour:'2-digit', minute:'2-digit' });
-  alertLog.unshift({ type, msg, time });
-  if (alertLog.length > 6) alertLog.pop();
-  renderAlerts();
-}
-
-function renderAlerts() {
-  const list = document.getElementById('alerts-list');
-  document.getElementById('alert-count').textContent = alertLog.length;
-  if (!alertLog.length) {
-    list.innerHTML = '<div class="no-alerts">No active alerts</div>';
-    return;
-  }
-  list.innerHTML = alertLog.map(a =>
-    `<div class="alert-item a-${a.type}">
-       <div class="alert-dot"></div>
-       <div style="flex:1">${a.msg}</div>
-       <div class="alert-time">${a.time}</div>
-     </div>`
-  ).join('');
-}
-
-// ═══════════════════════════════════════════
-//  RENDER LANE CARDS
-// ═══════════════════════════════════════════
-let firstLoad = true;
-let lastEmergencyState = false;
-
-function renderLanes(lanes) {
-  const container = document.getElementById('laneData');
-  const existingCards = new Set([...container.querySelectorAll('.lane-card')].map(c => c.dataset.lane));
-  const newLaneIds = new Set(Object.keys(lanes));
-
-  // Remove cards for lanes that no longer exist
-  existingCards.forEach(id => {
-    if (!newLaneIds.has(id)) {
-      const old = container.querySelector(`.lane-card[data-lane="${id}"]`);
-      if (old) old.remove();
-      if (laneTimers[id]) { clearInterval(laneTimers[id].interval); delete laneTimers[id]; }
-    }
-  });
-
-  Object.entries(lanes).forEach(([laneId, info]) => {
-    const vehicles   = info.vehicles || 0;
-    const emergency  = info.emergency || false;
-    const apiPhase   = getPhaseFromAPI(info);
-
-    // Init timer on first load or if phase changed via API
-    if (!laneTimers[laneId]) {
-      const phase = apiPhase || derivePhase(vehicles);
-      initLaneTimer(laneId, phase);
-    } else if (apiPhase && apiPhase !== laneTimers[laneId].phase) {
-      // API is authoritative — resync
-      clearInterval(laneTimers[laneId].interval);
-      delete laneTimers[laneId];
-      initLaneTimer(laneId, apiPhase);
-    }
-
-    const timer = laneTimers[laneId];
-
-    // Build or update card
-    let card = container.querySelector(`.lane-card[data-lane="${laneId}"]`);
     if (!card) {
       card = document.createElement('div');
-      card.className = 'lane-card';
-      card.dataset.lane = laneId;
+      card.className    = 'lane-card';
+      card.dataset.lane = lid;
       card.innerHTML = `
-        <div class="lane-name">${laneId}</div>
+        <div class="lane-card-title">${dispName}</div>
+        <div class="lane-card-id">${lid}</div>
         <div class="traffic-light">
           <div class="tl-bulb tl-red"></div>
           <div class="tl-bulb tl-amber"></div>
           <div class="tl-bulb tl-green"></div>
         </div>
-        <div class="lane-timer ${timer.phase}">${timer.countdown}s</div>
-        <div class="phase-label">${timer.phase.toUpperCase()}</div>
+        <div class="lane-timer ${tClass}">${timer.countdown}s</div>
+        <div class="phase-lbl">${timer.phase.toUpperCase()}</div>
         <div class="lane-stats">
           <div class="lane-stat-row">
-            <span class="lane-stat-label">Vehicles</span>
-            <span class="lane-stat-val veh-count">${vehicles}</span>
+            <span class="ls-label">Vehicles</span>
+            <span class="ls-val veh-val">${vehicles}</span>
           </div>
           <div class="lane-stat-row">
-            <span class="lane-stat-label">Emergency</span>
-            <span class="lane-stat-val emg-val">${emergency ? '🚑 YES' : 'None'}</span>
+            <span class="ls-label">Emergency</span>
+            <span class="ls-val emg-val">${emergency ? '🚑 YES' : 'None'}</span>
+          </div>
+          <div class="lane-stat-row wait-row">
+            <span class="ls-label">Wait</span>
+            <span class="ls-val wait-val">${waitTime}s</span>
           </div>
         </div>
-        ${emergency ? '<div class="emg-badge">EMG</div>' : ''}
+        <div class="pri-row ${currentMode==='smart' ? 'show':''}">
+          <span class="pri-label">Score</span>
+          <div class="pri-track"><div class="pri-bar" style="width:${priPct}%"></div></div>
+          <span class="pri-score">${priority}</span>
+        </div>
+        ${emergency ? '<div class="emg-badge">🚑 EMG</div>' : ''}
       `;
-      container.appendChild(card);
+      grid.appendChild(card);
     } else {
-      // Update existing card stats
-      card.querySelector('.veh-count').textContent = vehicles;
-      card.querySelector('.emg-val').textContent   = emergency ? '🚑 YES' : 'None';
-      const badge = card.querySelector('.emg-badge');
-      if (emergency && !badge) {
-        const b = document.createElement('div');
-        b.className = 'emg-badge'; b.textContent = 'EMG';
-        card.appendChild(b);
-      } else if (!emergency && badge) {
-        badge.remove();
-      }
+      // Update values
+      card.querySelector('.veh-val').textContent  = vehicles;
+      card.querySelector('.emg-val').textContent  = emergency ? '🚑 YES' : 'None';
+      card.querySelector('.wait-val').textContent = waitTime + 's';
+      const pb = card.querySelector('.pri-bar');
+      const ps = card.querySelector('.pri-score');
+      if (pb) pb.style.width = priPct + '%';
+      if (ps) ps.textContent = priority;
+      card.querySelector('.pri-row')?.classList.toggle('show', currentMode==='smart');
+      let badge = card.querySelector('.emg-badge');
+      if (emergency && !badge) { const b=document.createElement('div'); b.className='emg-badge'; b.textContent='🚑 EMG'; card.appendChild(b); }
+      else if (!emergency && badge) badge.remove();
     }
 
-    // Update classes
-    card.classList.toggle('emergency-lane', emergency);
-    card.classList.toggle('active-lane', vehicles > 0 && !emergency);
-
-    // Sync light UI
-    updateLaneTimerUI(laneId, timer);
+    card.classList.toggle('is-green', isGreen && !emergency);
+    card.classList.toggle('is-emg',   emergency);
+    applyTimerToCard(lid, timer);
   });
 }
 
-// ═══════════════════════════════════════════
-//  MAIN DATA FETCH
-// ═══════════════════════════════════════════
-let fetchCount = 0;
+/* ══════════════════
+   CHARTS
+══════════════════ */
+const COPTS = {
+  responsive:true, maintainAspectRatio:false, animation:{duration:300},
+  plugins:{legend:{display:false}},
+  scales:{
+    x:{ticks:{color:'#4a6070',font:{family:"'Share Tech Mono'",size:9},maxTicksLimit:7,autoSkip:true},grid:{color:'#1e2a35'}},
+    y:{ticks:{color:'#4a6070',font:{family:"'Share Tech Mono'",size:9}},grid:{color:'#1e2a35'},beginAtZero:true}
+  }
+};
+const fL=[], fD=[], fLA=[], fDA=[];
+let cFlow, cFlowA, cBar, cPri;
 
-async function loadTrafficData() {
-  try {
-    const res  = await fetch('/api/traffic');
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
+function initCharts() {
+  cFlow  = new Chart(document.getElementById('chart-flow').getContext('2d'),{
+    type:'line', data:{labels:fL,datasets:[{data:fD,borderColor:'#00e5ff',backgroundColor:'rgba(0,229,255,.07)',borderWidth:1.5,pointRadius:2,fill:true,tension:.4}]}, options:COPTS
+  });
+  cFlowA = new Chart(document.getElementById('chart-flow-a').getContext('2d'),{
+    type:'line', data:{labels:fLA,datasets:[{data:fDA,borderColor:'#00e5ff',backgroundColor:'rgba(0,229,255,.07)',borderWidth:1.5,pointRadius:2,fill:true,tension:.4}]}, options:COPTS
+  });
+  cBar   = new Chart(document.getElementById('chart-bar').getContext('2d'),{
+    type:'bar', data:{labels:[],datasets:[{data:[],backgroundColor:'rgba(0,229,255,.45)',borderColor:'#00e5ff',borderWidth:1,borderRadius:4}]}, options:COPTS
+  });
+  cPri   = new Chart(document.getElementById('chart-pri').getContext('2d'),{
+    type:'bar', data:{labels:[],datasets:[{data:[],backgroundColor:'rgba(168,85,247,.45)',borderColor:'#a855f7',borderWidth:1,borderRadius:4}]}, options:COPTS
+  });
+}
 
-    const lanes        = data.lanes || {};
-    const laneIds      = Object.keys(lanes);
-    const laneCount    = laneIds.length;
-    let totalVehicles  = 0;
-    let activeLanes    = 0;
-    let emergencyFound = false;
+function updateCharts(data) {
+  const lanes = data.lanes || {};
+  const ids   = Object.keys(lanes);
+  const total = ids.reduce((s,id) => s+(lanes[id].vehicles||0), 0);
+  const t     = new Date().toLocaleTimeString('en-IN',{hour12:false,hour:'2-digit',minute:'2-digit',second:'2-digit'});
 
-    laneIds.forEach(id => {
-      const l = lanes[id];
-      totalVehicles += (l.vehicles || 0);
-      if ((l.vehicles || 0) > 0) activeLanes++;
-      if (l.emergency) emergencyFound = true;
-    });
+  // Simulation page flow chart
+  fL.push(t); fD.push(total);
+  if (fL.length > 20) { fL.shift(); fD.shift(); }
+  cFlow.update();
 
-    // Update stat cards
-    document.getElementById('vehicleCount').textContent = totalVehicles;
-    document.getElementById('laneCount').textContent    = laneCount;
-    document.getElementById('activeLanes').textContent  = activeLanes;
-    document.getElementById('emergency').textContent    = emergencyFound ? 'YES' : 'NONE';
-    document.getElementById('vehicle-sub').textContent  = `${activeLanes} active, ${laneCount - activeLanes} clear`;
-    document.getElementById('active-sub').textContent   = `${Math.round(activeLanes/laneCount*100)||0}% utilisation`;
+  // Analytics page flow chart (same data)
+  fLA.push(t); fDA.push(total);
+  if (fLA.length > 20) { fLA.shift(); fDA.shift(); }
+  cFlowA.update();
 
-    const emergCard = document.getElementById('emergency-card');
-    const emergSub  = document.getElementById('emergency-sub');
-    if (emergencyFound) {
-      emergCard.classList.add('emergency-on');
-      emergSub.textContent = '⚠ Emergency vehicle detected!';
-      if (!lastEmergencyState) addAlert('crit', 'Emergency vehicle detected — priority signal activated');
-    } else {
-      emergCard.classList.remove('emergency-on');
-      emergSub.textContent = 'All clear';
-    }
-    lastEmergencyState = emergencyFound;
+  // Bar charts with display names
+  const names = ids.map(id => `Lane ${laneOrder[id]||'?'}`);
+  cBar.data.labels   = names;
+  cBar.data.datasets[0].data = ids.map(id => lanes[id].vehicles||0);
+  cBar.update();
+  cPri.data.labels   = names;
+  cPri.data.datasets[0].data = ids.map(id => lanes[id].priority_score||0);
+  cPri.update();
+}
 
-    // Render lanes
-    renderLanes(lanes);
+/* ══════════════════
+   ALERTS
+══════════════════ */
+function addAlert(type, msg) {
+  const time = new Date().toLocaleTimeString('en-IN',{hour12:false,hour:'2-digit',minute:'2-digit'});
+  alertLog.unshift({type,msg,time});
+  if (alertLog.length > 8) alertLog.pop();
+  const html = alertLog.map(a=>`
+    <div class="alert-row al-${a.type}">
+      <div class="a-dot"></div>
+      <span style="flex:1">${a.msg}</span>
+      <span class="a-time">${a.time}</span>
+    </div>`).join('');
+  document.getElementById('alerts-list').innerHTML    = html || '<div class="no-alert-msg">No alerts</div>';
+  document.getElementById('a-alerts-list').innerHTML  = html || '<div class="no-alert-msg">No alerts</div>';
+  document.getElementById('alert-count').textContent   = alertLog.length;
+  document.getElementById('a-alert-count').textContent = alertLog.length;
+}
 
-    // Chart
-    pushChartPoint(totalVehicles);
+/* ══════════════════
+   RENDER ALL
+══════════════════ */
+function renderAll(data) {
+  lastData = data;
+  const lanes      = data.lanes || {};
+  const ids        = Object.keys(lanes);
+  const activeNorm = data.normal_active_lane || ids[0];
+  const activeSmart= data.smart_active_lane  || ids[0];
+  const activeLane = currentMode==='normal' ? activeNorm : activeSmart;
 
-    // Auto alerts
-    if (totalVehicles > 60) addAlert('warn', `High load — ${totalVehicles} vehicles detected across network`);
+  ids.forEach((lid,i) => { if(!laneOrder[lid]) laneOrder[lid]=i+1; });
 
-    // Hide loader
-    if (firstLoad) {
-      document.getElementById('sim-loading').classList.add('hidden');
-      firstLoad = false;
-      addAlert('ok', 'SUMO TraCI connection established — data streaming live');
-    }
+  let total=0, emg=false, emgLane='';
+  ids.forEach(id=>{ total+=lanes[id].vehicles||0; if(lanes[id].emergency){emg=true;emgLane=id;} });
 
-    fetchCount++;
-    document.getElementById('refresh-tag').textContent = `LIVE #${fetchCount}`;
+  // Sim meta
+  const dispActive = activeLane ? `Lane ${laneOrder[activeLane]} (${activeLane})` : '—';
+  document.getElementById('meta-active').textContent = dispActive;
+  document.getElementById('meta-step').textContent   = data.sim_step || 0;
+  document.getElementById('meta-src').textContent    = 'SOURCE: '+(data.source||'—').toUpperCase();
 
-  } catch (err) {
-    console.error('Traffic fetch error:', err);
-    const container = document.getElementById('laneData');
-    if (firstLoad) {
-      document.getElementById('sim-loading').innerHTML =
-        `<div class="error-state"><span>⚠</span>Cannot reach /api/traffic<br><small>${err.message}</small></div>`;
-    }
-    addAlert('warn', `API error: ${err.message}`);
+  // Smart banner
+  if (currentMode==='smart') {
+    const sDisp = activeSmart ? `Lane ${laneOrder[activeSmart]}` : '—';
+    document.getElementById('smart-reason').innerHTML = emg
+      ? `Green → <b style="color:var(--green)">${sDisp}</b> &nbsp;|&nbsp; Reason: <b>Emergency Vehicle 🚑</b>`
+      : `Green → <b style="color:var(--green)">${sDisp}</b> &nbsp;|&nbsp; Score: <b style="color:var(--purp)">${lanes[activeSmart]?.priority_score||'--'}</b>`;
+  }
+
+  // Analytics
+  document.getElementById('a-total').textContent     = total;
+  document.getElementById('a-total-sub').textContent = ids.length+' lanes monitored';
+  document.getElementById('a-lanes').textContent     = ids.length;
+  document.getElementById('a-active').textContent    = activeLane ? `Lane ${laneOrder[activeLane]}` : '--';
+  document.getElementById('a-emg').textContent       = emg ? 'YES 🚑' : 'NONE';
+  document.getElementById('a-emg-sub').textContent   = emg ? '⚠ Lane '+laneOrder[emgLane] : 'All clear';
+
+  // Sidebar status
+  const isLive = data.source === 'traci';
+  document.getElementById('src-tag').textContent  = 'SOURCE: '+(data.source||'—').toUpperCase();
+  document.getElementById('conn-lbl').textContent = isLive ? 'SUMO LIVE' : 'MOCK DATA';
+  document.getElementById('conn-ping').style.background = isLive ? 'var(--green)' : 'var(--amber)';
+
+  if (emg && !lastEmg) addAlert('crit', `Emergency detected — Lane ${laneOrder[emgLane]} (${emgLane})`);
+  if (total > 60)      addAlert('warn', `High load — ${total} vehicles`);
+  lastEmg = emg;
+
+  renderLanes(data);
+  updateCharts(data);
+
+  if (firstLoad) {
+    addAlert('ok', isLive ? 'SUMO-GUI launched — TraCI streaming live data' : 'Mock mode active — SUMO not detected');
+    firstLoad = false;
   }
 }
 
-// ═══════════════════════════════════════════
-//  BOOT
-// ═══════════════════════════════════════════
-initChart();
-loadTrafficData();
-setInterval(loadTrafficData, 2000);
-</script>
+/* ══════════════════
+   FETCH
+══════════════════ */
+async function fetchData() {
+  try {
+    const res = await fetch('/api/traffic');
+    if (!res.ok) throw new Error('HTTP '+res.status);
+    renderAll(await res.json());
+  } catch(e) {
+    addAlert('warn','API: '+e.message);
+  }
+}
 
+initCharts();
+fetchData();
+setInterval(fetchData, 2000);
+</script>
 </body>
 </html>

@@ -1,11 +1,17 @@
 from flask import Flask, request, redirect, render_template, jsonify, session
 import os
-from simulation.sumo import get_lane_data
+from simulation.sumo import get_lane_data, start_sumo, stop_sumo
+import atexit
+
+# app = Flask(...) ke baad, routes se pehle yeh add karo:
 
 app = Flask(
     __name__,
     template_folder="fronted"
 )
+
+start_sumo()
+atexit.register(stop_sumo)
 # required for session
 app.secret_key = "traffic_secret_key"
 
@@ -62,7 +68,13 @@ def signup():
     session['user'] = username
 
     return redirect("/dashboard")
+# app.py ke top pe import update karo:
+from simulation.sumo import get_lane_data, start_sumo, stop_sumo
+import atexit
 
+# app = Flask(...) ke baad, routes se pehle yeh add karo:
+start_sumo()
+atexit.register(stop_sumo)
 
 # ================= LOGIN =================
 @app.route('/login', methods=['POST'])
