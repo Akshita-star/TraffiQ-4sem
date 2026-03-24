@@ -1,19 +1,37 @@
 from flask import Flask, request, redirect, render_template, jsonify, session
+import sqlite3
 import os
 from simulation.sumo import get_lane_data, start_sumo, stop_sumo
 import atexit
-
-# app = Flask(...) ke baad, routes se pehle yeh add karo:
 
 app = Flask(
     __name__,
     template_folder="fronted"
 )
 
+app.secret_key = "traffic_secret_key"
+
+# ---------------- SQLite Config ----------------
+DB_PATH = "users.db"
+
+def init_db():
+    con = sqlite3.connect(DB_PATH)
+    cur = con.cursor()
+    cur.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT NOT NULL,
+            email TEXT NOT NULL,
+            password TEXT NOT NULL
+        )
+    ''')
+    con.commit()
+    con.close()
+
+init_db()
+
 start_sumo()
 atexit.register(stop_sumo)
-# required for session
-app.secret_key = "traffic_secret_key"
 
 
 # ================= API FOR SUMO =================
@@ -48,33 +66,23 @@ def signup():
     email = request.form['email']
     password = request.form['password']
 
-    if not os.path.exists("cred.csv"):
-        open("cred.csv", "w").close()
+    con = sqlite3.connect(DB_PATH)
+    cur = con.cursor()
+    cur.execute("SELECT * FROM users WHERE username=? OR email=?", (username, email))
+    existing = cur.fetchone()
 
-    with open("cred.csv", "r") as f:
-        users = f.readlines()
+    if existing:
+        con.close()
+        return render_template("signup.html", message="User already exists ❌")
 
-    for user in users:
-        data = user.strip().split(",")
-        if len(data) == 3:
-            u, e, p = data
-            if u == username:
-                return render_template("signup.html", message="User already exists ❌")
+    cur.execute("INSERT INTO users (username, email, password) VALUES (?, ?, ?)",
+                (username, email, password))
+    con.commit()
+    con.close()
 
-    with open("cred.csv", "a") as f:
-        f.write(f"{username},{email},{password}\n")
-
-    # login user automatically
     session['user'] = username
-
     return redirect("/dashboard")
-# app.py ke top pe import update karo:
-from simulation.sumo import get_lane_data, start_sumo, stop_sumo
-import atexit
 
-# app = Flask(...) ke baad, routes se pehle yeh add karo:
-start_sumo()
-atexit.register(stop_sumo)
 
 # ================= LOGIN =================
 @app.route('/login', methods=['POST'])
@@ -82,21 +90,22 @@ def login():
     username = request.form['username']
     password = request.form['password']
 
-    if not os.path.exists("cred.csv"):
-        return render_template("login.html", message="No users registered ❌")
+    con = sqlite3.connect(DB_PATH)
+    cur = con.cursor()
+    cur.execute("SELECT username, password FROM users WHERE username=?", (username,))
+    user = cur.fetchone()
+    con.close()
 
-    with open("cred.csv", "r") as f:
-        users = f.readlines()
+    if not user:
+        return render_template("login.html", message="Invalid username or password ❌")
 
-    for user in users:
-        data = user.strip().split(",")
-        if len(data) == 3:
-            u, e, p = data
-            if u == username and p == password:
-                session['user'] = username
-                return redirect("/dashboard")
+    db_username, db_password = user
 
-    return render_template("login.html", message="Invalid username or password ❌")
+    if db_password == password:
+        session['user'] = db_username
+        return redirect("/dashboard")
+    else:
+        return render_template("login.html", message="Invalid username or password ❌")
 
 
 # ================= DASHBOARD (PROTECTED) =================
