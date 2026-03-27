@@ -27,7 +27,7 @@ _lock         = threading.Lock()
 
 
 def start_sumo():
-    global _sumo_started, _sumo_process
+    global _sumo_started, _sumo_process, _lane_ids
     if not TRACI_AVAILABLE:
         print("[TraffiQ] TraCI unavailable.")
         return False
@@ -53,6 +53,14 @@ def start_sumo():
                 traci.init(port=TRACI_PORT, numRetries=1)
                 _sumo_started = True
                 print(f"[TraffiQ] TraCI connected ✓")
+
+                # ── DEBUG: print all lane IDs on connect ──
+                all_lanes = traci.lane.getIDList()
+                filtered  = [l for l in all_lanes if not l.startswith(':')]
+                print(f"[TraffiQ] ALL LANES: {all_lanes}")
+                print(f"[TraffiQ] FILTERED LANES (no junctions): {filtered}")
+                print(f"[TraffiQ] TL controlled lanes: {list(traci.trafficlight.getControlledLanes(traci.trafficlight.getIDList()[0]))}")
+
                 return True
             except Exception:
                 pass
@@ -90,7 +98,8 @@ def get_lane_data():
         lanes = {}
         try:
             all_lane_ids = traci.lane.getIDList()
-            lane_ids     = [l for l in all_lane_ids if not l.startswith(":")][:4]
+            tl_ids = traci.trafficlight.getIDList()
+            lane_ids = list(traci.trafficlight.getControlledLanes(tl_ids[0]))[:4]
 
             # ── Get exact phase + remaining duration from SUMO ──
             tl_data = {}   # lane_id → { phase, time_remaining }
