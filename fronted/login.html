@@ -3,287 +3,128 @@
 <head>
 <meta charset="UTF-8">
 <title>Login — TraffiQ</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg:      #080c10;
-    --bg2:     #0d1219;
-    --bg3:     #121920;
-    --border:  #1e2a35;
-    --border2: #243040;
-    --cyan:    #00e5ff;
-    --green:   #00ff88;
-    --red:     #ff3b5c;
-    --text:    #c8d8e8;
-    --text-dim:#4a6070;
-    --mono:    'Share Tech Mono', monospace;
-    --sans:    'Rajdhani', sans-serif;
-  }
-
   * { margin: 0; padding: 0; box-sizing: border-box; }
-
   body {
-    font-family: var(--sans);
-    background: var(--bg);
-    color: var(--text);
+    font-family: monospace;
+    background: #5d3b3b;
+    color: #ffffff;
     min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    overflow: hidden;
-    position: relative;
   }
-
-  /* Grid background */
-  body::before {
-    content: '';
-    position: fixed; inset: 0;
-    background-image:
-      linear-gradient(rgba(0,229,255,.04) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0,229,255,.04) 1px, transparent 1px);
-    background-size: 48px 48px;
-    pointer-events: none;
-  }
-
-  /* Scanlines */
-  body::after {
-    content: '';
-    position: fixed; inset: 0;
-    background: repeating-linear-gradient(
-      0deg, transparent, transparent 2px,
-      rgba(0,0,0,.05) 2px, rgba(0,0,0,.05) 4px
-    );
-    pointer-events: none;
-    z-index: 999;
-  }
-
-  /* Glow orb */
-  .orb {
-    position: fixed;
-    width: 500px; height: 500px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(0,229,255,.06) 0%, transparent 70%);
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    pointer-events: none;
-    animation: breathe 6s ease-in-out infinite;
-  }
-  @keyframes breathe {
-    0%,100% { transform: translate(-50%,-50%) scale(1);   opacity: .7; }
-    50%      { transform: translate(-50%,-50%) scale(1.1); opacity: 1;  }
-  }
-
-  /* Corner brackets */
-  .corner {
-    position: fixed;
-    width: 60px; height: 60px;
-    border-color: rgba(0,229,255,.2);
-    border-style: solid;
-    pointer-events: none;
-  }
-  .corner-tl { top: 24px; left: 24px;  border-width: 2px 0 0 2px; }
-  .corner-tr { top: 24px; right: 24px; border-width: 2px 2px 0 0; }
-  .corner-bl { bottom: 24px; left: 24px;  border-width: 0 0 2px 2px; }
-  .corner-br { bottom: 24px; right: 24px; border-width: 0 2px 2px 0; }
-
-  /* ── Login Box ── */
   .box {
-    position: relative;
-    z-index: 10;
     width: 380px;
-    background: var(--bg2);
-    border: 1px solid var(--border);
+    background: #4a2e2e;
+    border: 1px solid #a06060;
     border-radius: 12px;
     padding: 40px 36px 36px;
-    animation: fadeUp .7s ease both;
-    overflow: hidden;
   }
-  /* Top cyan accent line */
-  .box::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, var(--cyan), transparent);
-  }
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(24px); }
-    to   { opacity: 1; transform: none; }
-  }
-
-  /* sys tag */
   .sys-tag {
-    font-family: var(--mono);
     font-size: 10px;
     letter-spacing: 2px;
-    color: var(--text-dim);
+    color: #d4aaaa;
     margin-bottom: 10px;
   }
-
   h2 {
-    font-family: var(--mono);
     font-size: 20px;
     font-weight: 400;
     letter-spacing: 3px;
-    color: var(--cyan);
-    text-shadow: 0 0 20px rgba(0,229,255,.3);
+    color: #ffffff;
     margin-bottom: 28px;
     text-transform: uppercase;
   }
-
-  /* Divider */
   .divider {
     height: 1px;
-    background: linear-gradient(90deg, var(--cyan), transparent);
+    background: #a06060;
     margin-bottom: 28px;
-    opacity: .3;
+    opacity: .4;
   }
-
-  /* Form */
   form { display: flex; flex-direction: column; gap: 14px; }
-
-  .input-wrap {
-    position: relative;
-  }
   .input-label {
-    font-family: var(--mono);
     font-size: 10px;
     letter-spacing: 1.5px;
-    color: var(--text-dim);
+    color: #d4aaaa;
     text-transform: uppercase;
     margin-bottom: 6px;
     display: block;
   }
-
   input[type="text"],
   input[type="password"] {
     width: 100%;
     padding: 11px 14px;
-    background: var(--bg3);
-    border: 1px solid var(--border2);
+    background: #3d2424;
+    border: 1px solid #a06060;
     border-radius: 6px;
-    color: var(--text);
-    font-family: var(--mono);
+    color: #ffffff;
+    font-family: monospace;
     font-size: 13px;
-    letter-spacing: 1px;
     outline: none;
-    transition: border-color .2s, box-shadow .2s;
   }
-  input::placeholder { color: var(--text-dim); }
-  input:focus {
-    border-color: var(--cyan);
-    box-shadow: 0 0 0 3px rgba(0,229,255,.08);
-  }
-
+  input::placeholder { color: #c49090; }
+  input:focus { border-color: #ffffff; }
   button[type="submit"] {
     margin-top: 6px;
     width: 100%;
     padding: 13px;
     background: transparent;
-    border: 1px solid var(--cyan);
+    border: 1px solid #ffffff;
     border-radius: 6px;
-    color: var(--cyan);
-    font-family: var(--mono);
+    color: #ffffff;
+    font-family: monospace;
     font-size: 13px;
     letter-spacing: 3px;
     text-transform: uppercase;
     cursor: pointer;
-    transition: background .2s, box-shadow .2s, transform .15s;
   }
-  button[type="submit"]:hover {
-    background: rgba(0,229,255,.08);
-    box-shadow: 0 0 20px rgba(0,229,255,.15);
-    transform: translateY(-1px);
-  }
-  button[type="submit"]:active { transform: translateY(0); }
-
-  /* Flash message */
+  button[type="submit"]:hover { background: rgba(255,255,255,.1); }
   .message {
     margin-top: 16px;
     padding: 10px 14px;
-    background: rgba(255,59,92,.08);
-    border: 1px solid rgba(255,59,92,.3);
+    background: rgba(0,0,0,.2);
+    border: 1px solid #b07070;
     border-radius: 6px;
-    font-family: var(--mono);
     font-size: 11px;
-    color: var(--red);
-    letter-spacing: 1px;
+    color: #d4aaaa;
     text-align: center;
   }
-
-  /* Link */
   .link {
     margin-top: 20px;
     text-align: center;
     font-size: 12px;
-    color: var(--text-dim);
-    font-family: var(--mono);
-    letter-spacing: 1px;
+    color: #d4aaaa;
   }
-  .link a {
-    color: var(--green);
-    text-decoration: none;
-    transition: color .2s, text-shadow .2s;
-  }
-  .link a:hover {
-    color: var(--green);
-    text-shadow: 0 0 10px rgba(0,255,136,.4);
-  }
-
-  /* Status bar */
+  .link a { color: #ffffff; text-decoration: none; }
+  .link a:hover { text-decoration: underline; }
   .status-bar {
     position: fixed;
     bottom: 0; left: 0; right: 0;
     padding: 8px 24px;
-    border-top: 1px solid var(--border);
-    background: var(--bg2);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    font-family: var(--mono);
+    border-top: 1px solid #4a2e2e;
+    background: #3d2424;
     font-size: 10px;
-    color: var(--text-dim);
-    z-index: 10;
+    color: #d4aaaa;
   }
-  .status-left { display: flex; align-items: center; gap: 10px; }
-  .ping { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: ping 2s infinite; }
-  @keyframes ping {
-    0%,100% { box-shadow: 0 0 0 0 rgba(0,255,136,.6); }
-    50%      { box-shadow: 0 0 0 5px rgba(0,255,136,0); }
-  }
-  #clock { color: var(--cyan); letter-spacing: 2px; }
 </style>
 </head>
-
 <body>
 
-<div class="orb"></div>
-<div class="corner corner-tl"></div>
-<div class="corner corner-tr"></div>
-<div class="corner corner-bl"></div>
-<div class="corner corner-br"></div>
-
 <div class="box">
-
   <div class="sys-tag">// traffiq — auth module</div>
   <h2>System Login</h2>
   <div class="divider"></div>
 
   <form action="/login" method="POST">
-
-    <div class="input-wrap">
+    <div>
       <label class="input-label">Username</label>
       <input type="text" name="username" placeholder="Enter username" required>
     </div>
-
-    <div class="input-wrap">
+    <div>
       <label class="input-label">Password</label>
       <input type="password" name="password" placeholder="Enter password" required>
     </div>
-
     <button type="submit">Login →</button>
-
   </form>
 
   {% if message %}
@@ -293,25 +134,9 @@
   <div class="link">
     No account? <a href="/signup">Create Account →</a>
   </div>
-
 </div>
 
-<div class="status-bar">
-  <div class="status-left">
-    <div class="ping"></div>
-    <span>SYSTEM ONLINE</span>
-  </div>
-  <span id="clock">--:--:--</span>
-</div>
-
-<script>
-function updateClock() {
-  document.getElementById('clock').textContent =
-    new Date().toLocaleTimeString('en-IN', { hour12: false });
-}
-setInterval(updateClock, 1000);
-updateClock();
-</script>
+<div class="status-bar">SYSTEM ONLINE</div>
 
 </body>
 </html>
