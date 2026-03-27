@@ -11,7 +11,6 @@ app = Flask(
 
 app.secret_key = "traffic_secret_key"
 
-# ---------------- SQLite Config ----------------
 DB_PATH = "users.db"
 
 def init_db():
@@ -33,33 +32,27 @@ init_db()
 start_sumo()
 atexit.register(stop_sumo)
 
-
-# ================= API FOR SUMO =================
 @app.route('/api/traffic')
 def traffic_data():
     data = get_lane_data()
     return jsonify(data)
 
 
-# ================= HOME =================
+
 @app.route('/')
 def home():
     return render_template("index.html")
 
 
-# ================= LOGIN PAGE =================
 @app.route('/login')
 def login_page():
     return render_template("login.html")
 
-
-# ================= SIGNUP PAGE =================
 @app.route('/signup')
 def signup_page():
     return render_template("signup.html")
 
 
-# ================= SIGNUP =================
 @app.route('/signup', methods=['POST'])
 def signup():
     username = request.form['username']
@@ -84,7 +77,6 @@ def signup():
     return redirect("/dashboard")
 
 
-# ================= LOGIN =================
 @app.route('/login', methods=['POST'])
 def login():
     username = request.form['username']
@@ -108,7 +100,7 @@ def login():
         return render_template("login.html", message="Invalid username or password ❌")
 
 
-# ================= DASHBOARD (PROTECTED) =================
+
 @app.route('/dashboard')
 def dashboard():
     if 'user' not in session:
@@ -116,13 +108,12 @@ def dashboard():
     return render_template("dashboard.html", user=session['user'])
 
 
-# ================= LOGOUT =================
+
 @app.route('/logout')
 def logout():
     session.pop('user', None)
     return redirect("/login")
 
 
-# ================= RUN APP =================
 if __name__ == '__main__':
     app.run(debug=True, use_reloader=False)

@@ -77,13 +77,12 @@
         <lane id="E2_0" index="0" speed="13.89" length="36.37" shape="-6.97,9.61 -6.85,45.97"/>
     </edge>
 
-    <tlLogic id="clusterJ2_clusterJ2_J4_J5" type="static" programID="0" offset="0"> 
-    <phase duration="20" state="GGrrGGrr"/>
-    <phase duration="3"  state="yyrryyrr"/>
-    <phase duration="20" state="rrGGrrGG"/>
-    <phase duration="3"  state="rryyrryy"/>
-
-    </tlLogic>
+    <tlLogic id="clusterJ2_clusterJ2_J4_J5" type="static" programID="0" offset="0">
+    <phase duration="20" state="GrGr"/>
+    <phase duration="3"  state="yryr"/>
+    <phase duration="20" state="rGrG"/>
+    <phase duration="3"  state="ryry"/>
+</tlLogic>
 
     <junction id="J0" type="dead_end" x="-60.24" y="2.07" incLanes="-E0.74_0" intLanes="" shape="-60.24,2.07 -60.26,5.27 -60.24,2.07"/>
     <junction id="J1" type="dead_end" x="60.24" y="2.80" incLanes="E0.51_0" intLanes="" shape="60.24,2.80 60.26,-0.40 60.24,2.80"/>
