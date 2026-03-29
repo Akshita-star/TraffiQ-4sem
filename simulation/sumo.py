@@ -1,20 +1,15 @@
-"""
-sumo.py — TraffiQ SUMO TraCI Interface
-Streams exact TraCI data — phase, duration, vehicles, emergency.
-No mock, no smart mode, no client-side logic.
-"""
-
 import os
 import time
 import threading
 import subprocess
+import heapq
 
 try:
     import traci
     TRACI_AVAILABLE = True
 except ImportError:
     TRACI_AVAILABLE = False
-    print("[TraffiQ] WARNING: traci not installed.")
+    print("traci not working properly(line11).")
 
 SUMO_CFG    = os.path.join(os.path.dirname(__file__), "final.sumocfg")
 SUMO_BINARY = "sumo-gui"
@@ -24,6 +19,14 @@ _sumo_started = False
 _sumo_process = None
 _sim_step     = 0
 _lock         = threading.Lock()
+
+
+# ── Priority Score Calculator ──
+def calculate_priority(lane_data):
+    score = 0
+    score += lane_data["vehicles"] * 2
+    score += lane_data["wait_time"] * 0.5
+    return score
 
 
 def start_sumo():
@@ -54,7 +57,6 @@ def start_sumo():
                 _sumo_started = True
                 print(f"[TraffiQ] TraCI connected ✓")
 
-                # ── DEBUG: print all lane IDs on connect ──
                 all_lanes = traci.lane.getIDList()
                 filtered  = [l for l in all_lanes if not l.startswith(':')]
                 print(f"[TraffiQ] ALL LANES: {all_lanes}")
@@ -97,12 +99,11 @@ def get_lane_data():
 
         lanes = {}
         try:
-            all_lane_ids = traci.lane.getIDList()
-            tl_ids = traci.trafficlight.getIDList()
+            tl_ids   = traci.trafficlight.getIDList()
             lane_ids = list(traci.trafficlight.getControlledLanes(tl_ids[0]))[:4]
 
-            # ── Get exact phase + remaining duration from SUMO ──
-            tl_data = {}   # lane_id → { phase, time_remaining }
+            # ── Traffic light phase + timer ──
+            tl_data = {}
             try:
                 for tl_id in traci.trafficlight.getIDList():
                     state          = traci.trafficlight.getRedYellowGreenState(tl_id)
@@ -126,13 +127,13 @@ def get_lane_data():
             except Exception as e:
                 print(f"[TraffiQ] TL error: {e}")
 
+            # ── Lane data fetch ──
             for lane_id in lane_ids:
                 try:
                     vehicle_ids   = traci.lane.getLastStepVehicleIDs(lane_id)
                     vehicle_count = len(vehicle_ids)
                     wait_time     = round(traci.lane.getWaitingTime(lane_id), 1)
 
-                    # Emergency detection
                     emergency = False
                     for vid in vehicle_ids:
                         try:
@@ -149,15 +150,39 @@ def get_lane_data():
                         "emergency":      emergency,
                         "wait_time":      wait_time,
                         "phase":          tl_info["phase"],
-                        "time_remaining": tl_info["time_remaining"],  # exact SUMO timer
+                        "time_remaining": tl_info["time_remaining"],
                     }
                 except Exception as e:
                     print(f"[TraffiQ] Lane {lane_id}: {e}")
 
+            # ── Priority Queue ──
+            heap = []
+            for lane_id, data in lanes.items():
+                score = calculate_priority(data)
+                heapq.heappush(heap, (-score, lane_id))
+
+            # sorted priority order — index 0 = highest priority
+            priority_order = []
+            temp_heap = heap.copy()
+            while temp_heap:
+                priority_order.append(heapq.heappop(temp_heap)[1])
+
+            top_priority_lane = priority_order[0] if priority_order else None
+
+            # score bhi attach karo har lane ke saath — dashboard pe dikhega
+            for rank, lane_id in enumerate(priority_order):
+                if lane_id in lanes:
+                    lanes[lane_id]["priority_rank"] = rank + 1
+                    lanes[lane_id]["priority_score"] = round(
+                        calculate_priority(lanes[lane_id]), 1
+                    )
+
             return {
-                "lanes":    lanes,
-                "sim_step": _sim_step,
-                "source":   "traci",
+                "lanes":             lanes,
+                "sim_step":          _sim_step,
+                "source":            "traci",
+                "priority_order":    priority_order,
+                "top_priority_lane": top_priority_lane,
             }
 
         except Exception as e:

@@ -66,7 +66,7 @@ def signup():
 
     if existing:
         con.close()
-        return render_template("signup.html", message="User already exists ❌")
+        return render_template("signup.html", message="User already exists")
 
     cur.execute("INSERT INTO users (username, email, password) VALUES (?, ?, ?)",
                 (username, email, password))
@@ -89,7 +89,7 @@ def login():
     con.close()
 
     if not user:
-        return render_template("login.html", message="Invalid username or password ❌")
+        return render_template("login.html", message="Invalid username or password")
 
     db_username, db_password = user
 
