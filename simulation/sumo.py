@@ -1,8 +1,8 @@
 import os
 import time
-import threading
-import subprocess
-import heapq
+import threading #to accept one  requuest at a tiem
+import subprocess #start sumo from python
+import heapq #priority quuee
 
 try:
     import traci
@@ -21,7 +21,6 @@ _sim_step     = 0
 _lock         = threading.Lock()
 
 
-# ── Priority Score Calculator ──
 def calculate_priority(lane_data):
     score = 0
     score += lane_data["vehicles"] * 2
@@ -32,52 +31,53 @@ def calculate_priority(lane_data):
 def start_sumo():
     global _sumo_started, _sumo_process, _lane_ids
     if not TRACI_AVAILABLE:
-        print("[TraffiQ] TraCI unavailable.")
+        print("TraCI unavailable.")
         return False
-    if _sumo_started:
+    if _sumo_started: #ie.e. if sumo already running and is true then  it doesnt run multiple times
         return True
-    if not os.path.exists(SUMO_CFG):
-        print(f"[TraffiQ] Config not found: {SUMO_CFG}")
+    if not os.path.exists(SUMO_CFG):#check file exists
+        print("not found dile")
         return False
     try:
         print(f"[TraffiQ] Launching sumo-gui: {SUMO_CFG}")
-        cmd = [
+        cmd = [ #officislly laucn sumo
             SUMO_BINARY, "-c", SUMO_CFG,
-            "--remote-port", str(TRACI_PORT),
+            "--remote-port", str(TRACI_PORT),#8813
             "--no-step-log", "true",
             "--collision.action", "none",
             "--start", "--quit-on-end", "false"
         ]
         _sumo_process = subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        print(f"[TraffiQ] sumo-gui PID: {_sumo_process.pid} — waiting for TraCI...")
+        print(f"[TraffiQ] sumo-gui PID: {_sumo_process.pid} — waiting for TraCI")
         for _ in range(30):
             time.sleep(0.5)
             try:
                 traci.init(port=TRACI_PORT, numRetries=1)
                 _sumo_started = True
-                print(f"[TraffiQ] TraCI connected ✓")
+                print("TraCI connected ")
 
                 all_lanes = traci.lane.getIDList()
                 filtered  = [l for l in all_lanes if not l.startswith(':')]
-                print(f"[TraffiQ] ALL LANES: {all_lanes}")
-                print(f"[TraffiQ] FILTERED LANES (no junctions): {filtered}")
-                print(f"[TraffiQ] TL controlled lanes: {list(traci.trafficlight.getControlledLanes(traci.trafficlight.getIDList()[0]))}")
-
+                print(f"ALL LANES: {all_lanes}")
+                print(f"FILTERED LANES (no junctions): {filtered}")
+                print(f"TL controlled lanes: {list(traci.trafficlight.getControlledLanes(traci.trafficlight.getIDList()[0]))}")
                 return True
             except Exception:
                 pass
-        print("[TraffiQ] TraCI timed out.")
+        print("TraCI timed out.")#if not connected with 30tries
         return False
     except Exception as e:
-        print(f"[TraffiQ] Error: {e}")
+        print(f"Error: {e}")
         return False
 
 
 def stop_sumo():
     global _sumo_started, _sumo_process
     if TRACI_AVAILABLE and _sumo_started:
-        try: traci.close()
-        except: pass
+        try: 
+            traci.close()
+        except: 
+            pass
     if _sumo_process:
         try: _sumo_process.terminate()
         except: pass
@@ -154,8 +154,7 @@ def get_lane_data():
                     }
                 except Exception as e:
                     print(f"[TraffiQ] Lane {lane_id}: {e}")
-
-            # ── Priority Queue ──
+#akshita
             heap = []
             for lane_id, data in lanes.items():
                 score = calculate_priority(data)
