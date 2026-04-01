@@ -97,7 +97,7 @@ def login():
         session['user'] = db_username
         return redirect("/dashboard")
     else:
-        return render_template("login.html", message="Invalid username or password ❌")
+        return render_template("login.html", message="Invalid username or password ")
 
 
 

@@ -1,7 +1,7 @@
 import os
 import time
 import threading #to accept one  requuest at a tiem
-import subprocess #start sumo from python
+import subprocess #run external program from python
 import heapq #priority quuee
 
 try:
@@ -79,7 +79,8 @@ def stop_sumo():
         except: 
             pass
     if _sumo_process:
-        try: _sumo_process.terminate()
+        try:
+            _sumo_process.terminate()
         except: pass
     _sumo_started = False
     _sumo_process = None
@@ -87,28 +88,27 @@ def stop_sumo():
 
 def get_lane_data():
     global _sim_step
-    with _lock:
+    with _lock:#only 1 request at a time(crashing error)
         if not (TRACI_AVAILABLE and _sumo_started):
             return {"error": "SUMO not connected", "lanes": {}, "source": "none"}
 
         try:
-            traci.simulationStep()
-            _sim_step += 1
+            traci.simulationStep()#tells the simulaation to move 1 step forward
+            _sim_step += 1#later for dashboard graphs
         except Exception as e:
             return {"error": str(e), "lanes": {}, "source": "none"}
 
         lanes = {}
-        try:
+        try:#data fetching
             tl_ids   = traci.trafficlight.getIDList()
-            lane_ids = list(traci.trafficlight.getControlledLanes(tl_ids[0]))[:4]
+            lane_ids = list(traci.trafficlight.getControlledLanes(tl_ids[0]))[:4]#only first traffic junction used 4 way intersction
 
-            # ── Traffic light phase + timer ──
             tl_data = {}
             try:
                 for tl_id in traci.trafficlight.getIDList():
-                    state          = traci.trafficlight.getRedYellowGreenState(tl_id)
+                    state          = traci.trafficlight.getRedYellowGreenState(tl_id)#convert rgrg to red yellow green
                     controlled     = traci.trafficlight.getControlledLanes(tl_id)
-                    time_remaining = traci.trafficlight.getNextSwitch(tl_id) - traci.simulation.getTime()
+                    time_remaining = traci.trafficlight.getNextSwitch(tl_id) - traci.simulation.getTime()#countdown
                     time_remaining = max(0, round(time_remaining))
 
                     for i, cl in enumerate(controlled):
@@ -127,7 +127,6 @@ def get_lane_data():
             except Exception as e:
                 print(f"[TraffiQ] TL error: {e}")
 
-            # ── Lane data fetch ──
             for lane_id in lane_ids:
                 try:
                     vehicle_ids   = traci.lane.getLastStepVehicleIDs(lane_id)
@@ -160,7 +159,6 @@ def get_lane_data():
                 score = calculate_priority(data)
                 heapq.heappush(heap, (-score, lane_id))
 
-            # sorted priority order — index 0 = highest priority
             priority_order = []
             temp_heap = heap.copy()
             while temp_heap:
@@ -168,7 +166,6 @@ def get_lane_data():
 
             top_priority_lane = priority_order[0] if priority_order else None
 
-            # score bhi attach karo har lane ke saath — dashboard pe dikhega
             for rank, lane_id in enumerate(priority_order):
                 if lane_id in lanes:
                     lanes[lane_id]["priority_rank"] = rank + 1
