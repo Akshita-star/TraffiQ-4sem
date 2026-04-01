@@ -5,7 +5,6 @@
 <title>TraffiQ Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@300;400;600;700;900&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
 :root {
     --bg:    #5d3b3b;
@@ -145,10 +144,6 @@ header {
 
 header h1 { font-size: 19px; font-weight: 700; letter-spacing: 1px; color: var(--text); }
 
-.hdr-right { display: flex; align-items: center; gap: 20px; }
-
-#clock { font-family: var(--mono); font-size: 13px; color: var(--dim); letter-spacing: 2px; }
-
 .status-badge {
     padding: 5px 14px;
     background: rgba(68,160,96,.15);
@@ -225,7 +220,6 @@ header h1 { font-size: 19px; font-weight: 700; letter-spacing: 1px; color: var(-
     animation: emgFlash 1s infinite;
 }
 
-/* ── NEW: top priority card highlight ── */
 .lane-card.is-top-priority {
     border-color: #e0c040;
     box-shadow: 0 0 22px rgba(224,192,64,.25), 0 0 6px rgba(224,192,64,.15);
@@ -289,7 +283,6 @@ header h1 { font-size: 19px; font-weight: 700; letter-spacing: 1px; color: var(-
     animation: pingA 1s infinite;
 }
 
-/* ── NEW: priority rank badge ── */
 .priority-badge {
     position: absolute;
     top: 8px;
@@ -326,68 +319,6 @@ header h1 { font-size: 19px; font-weight: 700; letter-spacing: 1px; color: var(-
     border: 1px solid rgba(100,100,100,.2);
 }
 
-.analytics-body {
-    flex: 1;
-    padding: 18px 22px;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-}
-
-.stat-cards { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; flex-shrink: 0; }
-
-.sc {
-    background: var(--bg2);
-    border: 1px solid var(--bdr);
-    border-radius: 8px;
-    padding: 14px 16px;
-    position: relative;
-    overflow: hidden;
-}
-
-.sc::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
-.sc.cc::before { background: linear-gradient(90deg, var(--dim), transparent); }
-.sc.cg::before { background: linear-gradient(90deg, var(--green), transparent); }
-.sc.cr::before { background: linear-gradient(90deg, var(--red), transparent); }
-
-.sc-lbl { font-size: 10px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--dim); margin-bottom: 8px; }
-.sc-val { font-family: var(--mono); font-size: 30px; line-height: 1; }
-.sc.cc .sc-val { color: var(--text); }
-.sc.cg .sc-val { color: var(--green); }
-.sc.cr .sc-val { color: var(--red); }
-.sc-sub { font-size: 11px; color: var(--dim); margin-top: 5px; }
-
-.charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; flex: 1; min-height: 0; }
-
-.a-panel {
-    background: var(--bg2);
-    border: 1px solid var(--bdr);
-    border-radius: 10px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-}
-
-.a-head {
-    padding: 10px 16px;
-    border-bottom: 1px solid var(--bdr);
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-shrink: 0;
-}
-
-.a-tag  { font-family: var(--mono); font-size: 10px; color: var(--dim); padding: 2px 8px; border: 1px solid var(--bdr2); border-radius: 3px; }
-.a-body { flex: 1; padding: 12px; position: relative; min-height: 160px; }
-.a-body.no-pad { padding: 0; overflow-y: auto; }
-
-.no-alert-msg { padding: 16px; text-align: center; font-family: var(--mono); font-size: 11px; color: var(--dim); }
-
 ::-webkit-scrollbar { width: 3px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
 ::-webkit-scrollbar-thumb { background: var(--bdr); border-radius: 2px; }
@@ -398,8 +329,7 @@ header h1 { font-size: 19px; font-weight: 700; letter-spacing: 1px; color: var(-
 <div class="sidebar">
     <div class="logo">TRAFFIQ</div>
     <ul class="nav">
-        <li class="active" onclick="navTo('sim',this)"><span></span> Simulation</li>
-        <li onclick="navTo('analytics',this)"><span></span> Analytics</li>
+        <li class="active"><span></span> Simulation</li>
         <li class="nav-out" onclick="window.location='/logout'"><span>⏻</span> Logout</li>
     </ul>
     <div class="sidebar-footer">
@@ -414,10 +344,7 @@ header h1 { font-size: 19px; font-weight: 700; letter-spacing: 1px; color: var(-
 <div class="main">
     <header>
         <h1>Smart Traffic Control Dashboard</h1>
-        <div class="hdr-right">
-            <span id="clock">--:--:--</span>
-            <span class="status-badge">● SYSTEM ONLINE</span>
-        </div>
+        <span class="status-badge">● SYSTEM ONLINE</span>
     </header>
 
     <div class="page active" id="page-sim">
@@ -428,7 +355,6 @@ header h1 { font-size: 19px; font-weight: 700; letter-spacing: 1px; color: var(-
                 <span>Alerts: <b id="meta-alerts">0</b></span>
             </div>
             <div class="sim-meta">
-                <!-- NEW: top priority lane shown in topbar -->
                 <span>Top Priority: <b id="meta-top-priority">—</b></span>
                 <span id="meta-src">SOURCE: —</span>
             </div>
@@ -439,73 +365,19 @@ header h1 { font-size: 19px; font-weight: 700; letter-spacing: 1px; color: var(-
             </div>
         </div>
     </div>
-
-    <div class="page" id="page-analytics">
-        <div class="analytics-body">
-            <div class="stat-cards">
-                <div class="sc cc">
-                    <div class="sc-lbl">Total Vehicles</div>
-                    <div class="sc-val" id="a-total">--</div>
-                    <div class="sc-sub" id="a-total-sub">Loading…</div>
-                </div>
-                <div class="sc cg">
-                    <div class="sc-lbl">Green Lanes</div>
-                    <div class="sc-val" id="a-green">--</div>
-                    <div class="sc-sub">Currently green</div>
-                </div>
-                <div class="sc cr">
-                    <div class="sc-lbl">Emergency</div>
-                    <div class="sc-val" id="a-emg">NONE</div>
-                    <div class="sc-sub" id="a-emg-sub">All clear</div>
-                </div>
-            </div>
-            <div class="charts-grid">
-                <div class="a-panel">
-                    <div class="a-head">Traffic Flow <span class="a-tag">veh/step</span></div>
-                    <div class="a-body"><canvas id="chart-flow-a"></canvas></div>
-                </div>
-                <div class="a-panel">
-                    <div class="a-head">Vehicles Per Lane <span class="a-tag">current</span></div>
-                    <div class="a-body"><canvas id="chart-bar"></canvas></div>
-                </div>
-                <div class="a-panel">
-                    <div class="a-head">Wait Time Per Lane <span class="a-tag">seconds</span></div>
-                    <div class="a-body"><canvas id="chart-wait"></canvas></div>
-                </div>
-                <div class="a-panel">
-                    <div class="a-head">Alerts Log <span class="a-tag" id="a-alert-count">0</span></div>
-                    <div class="a-body no-pad" id="a-alerts-list">
-                        <div class="no-alert-msg">No alerts</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
 
 <script>
-let alertLog  = [];
-let firstLoad = true;
-let lastEmg   = false;
-let laneOrder = {};
-
-setInterval(() => {
-    document.getElementById('clock').textContent =
-        new Date().toLocaleTimeString('en-IN', { hour12: false });
-}, 1000);
-
-function navTo(page, el) {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.nav li').forEach(l => l.classList.remove('active'));
-    document.getElementById('page-' + page).classList.add('active');
-    if (el) el.classList.add('active');
-}
+let alertCount = 0;
+let firstLoad  = true;
+let lastEmg    = false;
+let laneOrder  = {};
 
 function renderLanes(data) {
-    const lanes          = data.lanes           || {};
-    const laneIds        = Object.keys(lanes);
-    const grid           = document.getElementById('lane-grid');
-    const topPriorityId  = data.top_priority_lane || null;   // NEW
+    const lanes         = data.lanes          || {};
+    const laneIds       = Object.keys(lanes);
+    const grid          = document.getElementById('lane-grid');
+    const topPriorityId = data.top_priority_lane || null;
 
     laneIds.forEach((lid, i) => { if (!laneOrder[lid]) laneOrder[lid] = i + 1; });
 
@@ -521,15 +393,14 @@ function renderLanes(data) {
         const phase         = info.phase           || 'red';
         const timeLeft      = info.time_remaining  || 0;
         const dispNum       = laneOrder[lid]       || '?';
-        const priorityRank  = info.priority_rank   || 0;    // NEW
-        const priorityScore = info.priority_score  || 0;    // NEW
+        const priorityRank  = info.priority_rank   || 0;
+        const priorityScore = info.priority_score  || 0;
 
-        // NEW: rank badge label + css class
-        const rankLabel     = `#${priorityRank}`;
-        const rankClass     = priorityRank === 1 ? 'rank-1'
-                            : priorityRank === 2 ? 'rank-2'
-                            : priorityRank === 3 ? 'rank-3'
-                            : 'rank-other';
+        const rankLabel = `#${priorityRank}`;
+        const rankClass = priorityRank === 1 ? 'rank-1'
+                        : priorityRank === 2 ? 'rank-2'
+                        : priorityRank === 3 ? 'rank-3'
+                        : 'rank-other';
 
         let card = grid.querySelector(`.lane-card[data-lane="${lid}"]`);
 
@@ -570,13 +441,11 @@ function renderLanes(data) {
             `;
             grid.appendChild(card);
         } else {
-            // update existing card values
             card.querySelector('.veh-val').textContent   = vehicles;
             card.querySelector('.wait-val').textContent  = waitTime + 's';
-            card.querySelector('.score-val').textContent = priorityScore;    // NEW
+            card.querySelector('.score-val').textContent = priorityScore;
             card.querySelector('.emg-val').textContent   = emergency ? 'YES' : 'None';
 
-            // NEW: update rank badge
             const badge = card.querySelector('.prio-badge');
             if (badge) {
                 badge.textContent = rankLabel;
@@ -606,100 +475,11 @@ function renderLanes(data) {
             }
         }
 
-        // phase classes
         card.classList.toggle('is-green', phase === 'green' && !emergency);
         card.classList.toggle('is-amber', phase === 'amber' && !emergency);
         card.classList.toggle('is-emg',   emergency);
-
-        // NEW: top priority highlight — only on non-emergency cards
         card.classList.toggle('is-top-priority', lid === topPriorityId && !emergency);
     });
-}
-
-const COPTS = {
-    responsive: true,
-    maintainAspectRatio: false,
-    animation: { duration: 200 },
-    plugins: { legend: { display: false } },
-    scales: {
-        x: {
-            ticks: { color: '#d4aaaa', font: { family: "'Share Tech Mono'", size: 9 }, maxTicksLimit: 7, autoSkip: true },
-            grid:  { color: '#a06060' }
-        },
-        y: {
-            ticks: { color: '#d4aaaa', font: { family: "'Share Tech Mono'", size: 9 } },
-            grid:  { color: '#a06060' },
-            beginAtZero: true
-        }
-    }
-};
-
-const fLA = [], fDA = [];
-let cFlowA, cBar, cWait;
-
-function initCharts() {
-    cFlowA = new Chart(document.getElementById('chart-flow-a').getContext('2d'), {
-        type: 'line',
-        data: {
-            labels: fLA,
-            datasets: [{ data: fDA, borderColor: '#d4aaaa', backgroundColor: 'rgba(212,170,170,.1)', borderWidth: 1.5, pointRadius: 2, fill: true, tension: .4 }]
-        },
-        options: COPTS
-    });
-    cBar = new Chart(document.getElementById('chart-bar').getContext('2d'), {
-        type: 'bar',
-        data: {
-            labels: [],
-            datasets: [{ data: [], backgroundColor: 'rgba(212,170,170,.4)', borderColor: '#d4aaaa', borderWidth: 1, borderRadius: 4 }]
-        },
-        options: COPTS
-    });
-    cWait = new Chart(document.getElementById('chart-wait').getContext('2d'), {
-        type: 'bar',
-        data: {
-            labels: [],
-            datasets: [{ data: [], backgroundColor: 'rgba(196,144,64,.45)', borderColor: '#c49040', borderWidth: 1, borderRadius: 4 }]
-        },
-        options: COPTS
-    });
-}
-
-function updateCharts(data) {
-    const lanes = data.lanes || {};
-    const ids   = Object.keys(lanes);
-    const total = ids.reduce((s, id) => s + (lanes[id].vehicles || 0), 0);
-    const t     = new Date().toLocaleTimeString('en-IN', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    const names = ids.map(id => `L${laneOrder[id] || '?'}`);
-
-    fLA.push(t);
-    fDA.push(total);
-    if (fLA.length > 20) { fLA.shift(); fDA.shift(); }
-    cFlowA.update();
-
-    cBar.data.labels            = names;
-    cBar.data.datasets[0].data  = ids.map(id => lanes[id].vehicles  || 0);
-    cBar.update();
-
-    cWait.data.labels           = names;
-    cWait.data.datasets[0].data = ids.map(id => lanes[id].wait_time || 0);
-    cWait.update();
-}
-
-function addAlert(type, msg) {
-    const time = new Date().toLocaleTimeString('en-IN', { hour12: false, hour: '2-digit', minute: '2-digit' });
-    alertLog.unshift({ type, msg, time });
-    if (alertLog.length > 10) alertLog.pop();
-
-    const html = alertLog.map(a => `
-        <div class="alert-row al-${a.type}">
-            <div class="a-dot"></div>
-            <span style="flex:1">${a.msg}</span>
-            <span class="a-time">${a.time}</span>
-        </div>`).join('');
-
-    document.getElementById('a-alerts-list').innerHTML   = html || '<div class="no-alert-msg">No alerts</div>';
-    document.getElementById('a-alert-count').textContent = alertLog.length;
-    document.getElementById('meta-alerts').textContent   = alertLog.length;
 }
 
 function renderAll(data) {
@@ -708,27 +488,27 @@ function renderAll(data) {
 
     ids.forEach((lid, i) => { if (!laneOrder[lid]) laneOrder[lid] = i + 1; });
 
-    let total = 0, emg = false, emgLane = '', greenCount = 0;
+    let total = 0, emg = false, emgLane = '';
     ids.forEach(id => {
         total += lanes[id].vehicles || 0;
-        if (lanes[id].emergency)         { emg = true; emgLane = id; }
-        if (lanes[id].phase === 'green')   greenCount++;
+        if (lanes[id].emergency) { emg = true; emgLane = id; }
     });
 
-    document.getElementById('meta-step').textContent   = data.sim_step || 0;
-    document.getElementById('meta-total').textContent  = total;
-    document.getElementById('meta-src').textContent    = 'SOURCE: ' + (data.source || '—').toUpperCase();
+    document.getElementById('meta-step').textContent  = data.sim_step || 0;
+    document.getElementById('meta-total').textContent = total;
+    document.getElementById('meta-src').textContent   = 'SOURCE: ' + (data.source || '—').toUpperCase();
 
-    // NEW: top priority in topbar
     const topId = data.top_priority_lane;
     document.getElementById('meta-top-priority').textContent =
         topId ? `Lane ${laneOrder[topId] || topId}` : '—';
 
-    document.getElementById('a-total').textContent     = total;
-    document.getElementById('a-total-sub').textContent = ids.length + ' lanes';
-    document.getElementById('a-green').textContent     = greenCount;
-    document.getElementById('a-emg').textContent       = emg ? 'YES' : 'NONE';
-    document.getElementById('a-emg-sub').textContent   = emg ? '⚠ Lane ' + laneOrder[emgLane] : 'All clear';
+    if (emg && !lastEmg) alertCount++;
+    if (total > 40)      alertCount++;
+    lastEmg = emg;
+
+    if (firstLoad) { alertCount++; firstLoad = false; }
+
+    document.getElementById('meta-alerts').textContent = alertCount;
 
     const isLive = data.source === 'traci';
     document.getElementById('src-tag').textContent        = 'SOURCE: ' + (data.source || '—').toUpperCase();
@@ -736,17 +516,7 @@ function renderAll(data) {
     document.getElementById('conn-lbl').style.color       = isLive ? 'var(--green)' : 'var(--red)';
     document.getElementById('conn-ping').style.background = isLive ? 'var(--green)' : 'var(--red)';
 
-    if (emg && !lastEmg) addAlert('crit', ` Emergency — Lane ${laneOrder[emgLane]}`);
-    if (total > 40)      addAlert('warn', `High load — ${total} vehicles`);
-    lastEmg = emg;
-
-    if (firstLoad) {
-        addAlert(isLive ? 'ok' : 'warn', isLive ? 'SUMO-GUI connected — TraCI live' : 'SUMO not connected');
-        firstLoad = false;
-    }
-
     renderLanes(data);
-    updateCharts(data);
 }
 
 async function fetchData() {
@@ -754,14 +524,13 @@ async function fetchData() {
         const res  = await fetch('/api/traffic');
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const data = await res.json();
-        if (data.error) { addAlert('warn', data.error); return; }
+        if (data.error) { console.warn(data.error); return; }
         renderAll(data);
     } catch(e) {
-        addAlert('warn', 'API: ' + e.message);
+        console.warn('API:', e.message);
     }
 }
 
-initCharts();
 fetchData();
 setInterval(fetchData, 2000);
 </script>
