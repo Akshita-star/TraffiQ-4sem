@@ -6,7 +6,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
-/* ── Reset & tokens ──────────────────────────────────────────────────────── */
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
 :root {
@@ -39,7 +38,6 @@ body {
     display: flex;
 }
 
-/* ── Sidebar ─────────────────────────────────────────────────────────────── */
 .sidebar {
     width: 220px;
     flex-shrink: 0;
@@ -133,7 +131,6 @@ body {
 .status-label { color: var(--text); font-weight: 600; }
 .status-source { font-size: 10px; color: var(--dim); margin-top: 4px; letter-spacing: 1px; }
 
-/* ── Main area ───────────────────────────────────────────────────────────── */
 .main {
     flex: 1;
     display: flex;
@@ -141,7 +138,6 @@ body {
     overflow: hidden;
 }
 
-/* ── Topbar ──────────────────────────────────────────────────────────────── */
 .topbar {
     padding: 12px 24px;
     border-bottom: 1px solid var(--border);
@@ -196,7 +192,6 @@ body {
     50%      { background: rgba(248,81,73,.18); }
 }
 
-/* ── Content ─────────────────────────────────────────────────────────────── */
 .content {
     flex: 1;
     overflow: hidden;
@@ -206,7 +201,6 @@ body {
     gap: 16px;
 }
 
-/* ── Stat cards row ──────────────────────────────────────────────────────── */
 .stat-row {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -251,7 +245,6 @@ body {
     margin-top: 2px;
 }
 
-/* ── Lane grid ───────────────────────────────────────────────────────────── */
 .lane-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -262,7 +255,6 @@ body {
     align-content: start;
 }
 
-/* ── Lane card ───────────────────────────────────────────────────────────── */
 .lane-card {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -303,7 +295,6 @@ body {
     box-shadow: 0 0 20px rgba(227,179,65,.1);
 }
 
-/* ── Card header ─────────────────────────────────────────────────────────── */
 .card-head {
     display: flex;
     align-items: flex-start;
@@ -338,7 +329,6 @@ body {
 .rank-3 { background: rgba(160,100,60,.15); color: #c08060;       border: 1px solid rgba(160,100,60,.25); }
 .rank-n { background: rgba(100,100,100,.1); color: var(--dim);    border: 1px solid rgba(100,100,100,.15); }
 
-/* ── Traffic light ───────────────────────────────────────────────────────── */
 .tl-row {
     display: flex;
     align-items: center;
@@ -390,7 +380,6 @@ body {
     margin-top: 3px;
 }
 
-/* ── Stats table ─────────────────────────────────────────────────────────── */
 .card-stats {
     border-top: 1px solid var(--border2);
     padding-top: 8px;
@@ -415,7 +404,7 @@ body {
 
 .stat-line .v.hi { color: var(--accent); }
 
-/* Green time bar */
+
 .green-bar-wrap {
     margin-top: 4px;
 }
@@ -444,7 +433,6 @@ body {
     transition: width .5s ease;
 }
 
-/* Badges ─────────────────────────────────────────────────────────────────── */
 .emg-tag {
     position: absolute;
     top: 10px; right: 10px;
@@ -468,7 +456,6 @@ body {
     opacity: .8;
 }
 
-/* ── Scrollbar ───────────────────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
@@ -476,7 +463,6 @@ body {
 </head>
 <body>
 
-<!-- ── Sidebar ────────────────────────────────────────────────────────────── -->
 <aside class="sidebar">
     <div class="logo">
         <div class="logo-mark">TRAFFIQ</div>
@@ -501,10 +487,8 @@ body {
     </div>
 </aside>
 
-<!-- ── Main ───────────────────────────────────────────────────────────────── -->
 <div class="main">
 
-    <!-- Topbar -->
     <div class="topbar">
         <div class="topbar-left">
             <h1>Traffic Control Dashboard</h1>
@@ -513,14 +497,13 @@ body {
         <div class="topbar-pills">
             <div class="pill">Step <b id="tp-step">0</b></div>
             <div class="pill">Top Priority <b id="tp-priority">—</b></div>
-            <div class="pill" id="tp-emg" style="display:none">🚑 EMERGENCY ACTIVE</div>
+            <div class="pill" id="tp-emg" style="display:none"> EMERGENCY ACTIVE</div>
         </div>
     </div>
 
-    <!-- Content -->
+   
     <div class="content">
 
-        <!-- Stat cards -->
         <div class="stat-row">
             <div class="stat-card">
                 <div class="stat-label">Simulation Step</div>
@@ -544,20 +527,18 @@ body {
             </div>
         </div>
 
-        <!-- Lane grid -->
         <div class="lane-grid" id="lane-grid"></div>
 
     </div>
 </div>
 
 <script>
-// ── State ─────────────────────────────────────────────────────────────────
-let laneOrder   = {};   // HashMap: lane_id → display number
+
+let laneOrder   = {};   
 let emgCount    = 0;
 let lastEmgLane = null;
 let firstPoll   = true;
 
-// ── Render ────────────────────────────────────────────────────────────────
 function renderAll(data) {
     const lanes        = data.lanes          || {};
     const laneIds      = Object.keys(lanes);
@@ -567,20 +548,17 @@ function renderAll(data) {
     const totalVeh     = data.total_vehicles    || 0;
     const step         = data.sim_step          || 0;
 
-    // Assign stable display numbers (order locked on first appearance)
+
     laneIds.forEach((id, i) => { if (!laneOrder[id]) laneOrder[id] = i + 1; });
 
-    // Emergency counter
     if (emgLane && emgLane !== lastEmgLane) emgCount++;
     lastEmgLane = emgLane;
 
-    // ── Stat cards ─────────────────────────────────────────────────────
     document.getElementById('sc-step').textContent     = step;
     document.getElementById('sc-vehicles').textContent = totalVeh;
     document.getElementById('sc-active').textContent   = activeLanes.length;
     document.getElementById('sc-emg').textContent      = emgCount;
 
-    // ── Topbar pills ────────────────────────────────────────────────────
     document.getElementById('tp-step').textContent     = step;
     document.getElementById('tp-priority').textContent =
         topId ? `Lane ${laneOrder[topId] || topId}` : '—';
@@ -727,7 +705,7 @@ function renderAll(data) {
             if (override === 'stopped' && !ovTag) {
                 const t = document.createElement('div');
                 t.className   = 'override-tag';
-                t.textContent = '⛔ OVERRIDE STOP';
+                t.textContent = ' OVERRIDE STOP';
                 card.appendChild(t);
             } else if (override !== 'stopped' && ovTag) {
                 ovTag.remove();
